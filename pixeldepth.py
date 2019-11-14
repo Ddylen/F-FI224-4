@@ -12,7 +12,7 @@ import numpy as np
 import cv2
 
 kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Depth)
-
+frameslist = []
 while True:
     # --- Getting frames and drawing
     if kinect.has_new_depth_frame():
@@ -20,6 +20,7 @@ while True:
         frameD = kinect._depth_frame_data
         frame = frame.astype(np.uint8)
         frame = np.reshape(frame, (424, 512))
+        
         frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
         def click_event(event, x, y, flags, param):
             if event == cv2.EVENT_LBUTTONDOWN:
@@ -34,3 +35,4 @@ while True:
 
     key = cv2.waitKey(1)
     if key == 27: break
+cv2.destroyAllWindows()
