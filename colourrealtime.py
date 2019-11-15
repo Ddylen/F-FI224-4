@@ -24,6 +24,7 @@ frameslist = []
 while True:
     # --- Getting frames and drawing
     if kinect.has_new_color_frame():
+        print(frame)
         frame = kinect.get_last_color_frame()
         frameD = kinect._color_frame_data
 
@@ -41,21 +42,22 @@ while True:
         frame = np.reshape(frame, (2073600, 4))
         
         frame = frame[:,0:3] #exclude superfluos values
-        print(frame[1][0])
-        print(frame.shape)
-        
+        #print(frame[1][0])
+        #print(frame.shape)
         frameR = frame[:,0]
         frameR = np.reshape(frameR, (1080, 1920))
         frameG = frame[:,1]
         frameG = np.reshape(frameG, (1080, 1920))        
         frameB = frame[:,2]
         frameB = np.reshape(frameB, (1080, 1920))
+        framefullcolour = cv2.merge([frameR, frameG, frameB])
         #print(len(frame))
+        #frame = cv2.cvtColor(framefullcolour, cv2.COLOR_GRAY2RGB)
+        cv2.imshow('KINECT Video Stream', framefullcolour)
+        print("color fires")
         
-        frame = cv2.cvtColor(frameB, cv2.COLOR_GRAY2RGB)
-       
-        cv2.imshow('KINECT Video Stream', frame)
 
+        
 
     key = cv2.waitKey(1)
     if key == 27: break
