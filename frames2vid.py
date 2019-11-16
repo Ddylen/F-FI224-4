@@ -9,13 +9,13 @@ datafile = open("depthdata/COLOUR11.15.13.49.pickle", "rb")
 
 frame = pickle.load(datafile)
 height, width, channels = frame.shape
-print(height)
-print(width)
-out = cv2.VideoWriter('videos/output44.avi', cv2.VideoWriter_fourcc(*'MJPG'), 30, (int(width), int(height))) #TODO: look in to why I have to say 30fs or else it goes to slow
+#print(height)
+#print(width)
+out = cv2.VideoWriter('videos/output66.avi', cv2.VideoWriter_fourcc(*'DIVX'), 10, (int(width), int(height))) #TODO: look in to why I have to say 30fs or else it goes to slow
 
 #frame = cv2.imread(im0)
-print(type(frame))
-print(frame.shape)
+#print(type(frame))
+#print(frame.shape)
 #frame = cv2.flip(frame,0)
 out.write(frame)
 cv2.imshow('video',frame)
@@ -28,7 +28,7 @@ while True:
         frame = pickle.load(datafile)
         #frame = cv2.imread(im)
         #frame = cv2.flip(frame,0)
-        print(frame.shape)
+        #print(frame.shape)
         out.write(frame)
         cv2.imshow('video',frame)
         if (cv2.waitKey(1) & 0xFF) == ord('q'): # Hit `q` to exit
