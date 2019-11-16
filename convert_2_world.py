@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Nov 13 16:08:29 2019
-
-@author: birl
+Code to convert a 3D camera coordinate vector to a 3D world coordinate vector
 """
 list1= [1,1,1]
 list2 = [2,2,2]

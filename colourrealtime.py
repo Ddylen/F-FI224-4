@@ -1,15 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Nov 14 17:14:55 2019
-
-@author: birl
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Nov 13 16:50:08 2019
-
-@author: birl
+Code to display colour image frames in real time, required significant slicing
 """
 
 from pykinect2 import PyKinectV2

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Nov 13 16:50:08 2019
-
-@author: birl
+Example code for recovering the depth of pixels and displaying it on a screen
 """
 
 from pykinect2 import PyKinectV2
