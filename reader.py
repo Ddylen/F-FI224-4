@@ -16,7 +16,6 @@ def interpret2D(folder, mode):
     #path = 'outputs/*.json'
     path = 'JSON/' + folder + '/*.json'
     text_files = glob.glob(path)
-    
     json_list = []
     wrist_list = []
     x_list = []

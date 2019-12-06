@@ -28,7 +28,10 @@ fpsmin = 100
 while True:
     # --- Getting frames and drawing
     elapsedtime = time.time()- starttime
-    
+    if kinect.has_new_depth_frame():
+        print("A")
+    if kinect.has_new_color_frame():
+        print("B")
     if kinect.has_new_depth_frame() and kinect.has_new_color_frame() :
         while(elapsedtime> i/10): #TODO find better timing method
             if i >100:
@@ -39,8 +42,9 @@ while True:
                         fpsmax= fps
                     if fps < fpsmin:
                         fpsmin = fps
-                    print(fpsmax - fpsmin)
+                    #print(fpsmax - fpsmin)
                 except ZeroDivisionError:
+                    print("fail")
                     pass
             oldtime = elapsedtime
         #if True:

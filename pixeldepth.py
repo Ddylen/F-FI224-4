@@ -25,7 +25,7 @@ while True:
                 print("pos is ", x, y)
             if event == cv2.EVENT_RBUTTONDOWN:
                 Pixel_Depth = frameD[((y * 512) + x)] # we need to specify pixel number, not x,y coordinates
-                print("depth is ", Pixel_Depth)
+                print("pos is ", x, y, "depth is ", Pixel_Depth)
         ##output = cv2.bilateralFilter(output, 1, 150, 75)
         cv2.imshow('KINECT Video Stream', frame)
         cv2.setMouseCallback('KINECT Video Stream', click_event)

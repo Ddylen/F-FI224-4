@@ -15,7 +15,7 @@ frameslist = []
 while True:
     # --- Getting frames and drawing
     if kinect.has_new_color_frame():
-        print(frame)
+        #print(frame)
         frame = kinect.get_last_color_frame()
         frameD = kinect._color_frame_data
 
@@ -45,7 +45,7 @@ while True:
         #print(len(frame))
         #frame = cv2.cvtColor(framefullcolour, cv2.COLOR_GRAY2RGB)
         cv2.imshow('KINECT Video Stream', framefullcolour)
-        print("color fires")
+        #print("color fires")
         
 
         

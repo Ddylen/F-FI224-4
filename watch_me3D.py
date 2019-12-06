@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Thu Nov 21 13:48:30 2019
+
+@author: birl
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Code for smoothly following a human demonstrator in 3D
 TODO: NOT FINISED YET
 TASKS:
@@ -29,6 +36,13 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits import mplot3d
 
+from pykinect2 import PyKinectV2
+from pykinect2.PyKinectV2 import *
+from pykinect2 import PyKinectRuntime
+import cv2
+
+kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Depth)
+
 """
 SOMETHING IS GOINT WRONG IN SCALING WITH HEIGHT
 """
@@ -53,30 +67,43 @@ def main():
         depthframe = pickle.load(depthdatafile) #need to do this once per frame
         #print(depthframe)
         depthframe = np.reshape(depthframe, (424, 512))
-        #print(depthframe)
-        #print(round(x_normalised*424))
-        #print(round(y_normalised*512))
-        """
-        arm_coords = convert_to_arm_coords(x_normalised,y_normalised,depthframe)
-        arm_pos_list.append(arm_coords)
-        """
-        depthfromcam = depthframe[round(x_normalised*424)][round(y_normalised*512)]/1000 #converted to m from mm # TODO: include some smoothing here
-        
-        x_camera_coords = depthfromcam* 0.86*2*(x_normalised-0.5)*x_scale_factor 
-        y_camera_coords = depthfromcam* 1.56*2*(y_normalised-0.5)*y_scale_factor # i think my scaling method is off by a bit
-        #print(x_camera_coords,y_camera_coords,depthfromcam)
-        
-
-        if depthfromcam != 0.0:
-
-            board_coords = convert_2_world(np.matrix([[x_camera_coords], [y_camera_coords], [depthfromcam]])) #TODO: confirm that this transformation applies for normalised pixel coordinates
-            #print(board_coords.item(0), board_coords.item(1), board_coords.item(2))
-            
-            board_to_arm_translation = np.matrix([[0.1],[0.39],[0.4]])#measured from board to arm 0,0,0 position
-            arm_coords_twisted = board_coords + board_to_arm_translation
-            arm_coords = np.matrix([[- arm_coords_twisted.item(0)], [-arm_coords_twisted.item(1)], [-arm_coords_twisted.item(2)]]) #axes for arm are other way round to that of checkerboard
-            arm_pos_list.append(arm_coords)
+        frame = cv2.cvtColor(depthframe, cv2.COLOR_GRAY2RGB)
+        def click_event(event, x, y, flags, param):
+            if event == cv2.EVENT_LBUTTONDOWN:
+                arm_coords = convert_to_arm_coords(x_normalised,y_normalised,depthframe)
+                print(arm_coords)
+        cv2.imshow('KINECT Video Stream', frame)
+        cv2.setMouseCallback('KINECT Video Stream', click_event)
+        output = None
+        key = cv2.waitKey(1)
+        if key == 27: 
+            break
+    cv2.destroyAllWindows()
+    #print(depthframe)
+    #print(round(x_normalised*424))
+    #print(round(y_normalised*512))
+    """
+    arm_coords = convert_to_arm_coords(x_normalised,y_normalised,depthframe)
+    arm_pos_list.append(arm_coords)
+    """
+    """
+    depthfromcam = depthframe[round(x_normalised*424)][round(y_normalised*512)]/1000 #converted to m from mm # TODO: include some smoothing here
     
+    x_camera_coords = depthfromcam* 0.86*2*(x_normalised-0.5)*x_scale_factor 
+    y_camera_coords = depthfromcam* 1.56*2*(y_normalised-0.5)*y_scale_factor # i think my scaling method is off by a bit
+    #print(x_camera_coords,y_camera_coords,depthfromcam)
+    
+
+    if depthfromcam != 0.0:
+
+        board_coords = convert_2_world(np.matrix([[x_camera_coords], [y_camera_coords], [depthfromcam]])) #TODO: confirm that this transformation applies for normalised pixel coordinates
+        #print(board_coords.item(0), board_coords.item(1), board_coords.item(2))
+        
+        board_to_arm_translation = np.matrix([[0.1],[0.39],[0.4]])#measured from board to arm 0,0,0 position
+        arm_coords_twisted = board_coords + board_to_arm_translation
+        arm_coords = np.matrix([[- arm_coords_twisted.item(0)], [-arm_coords_twisted.item(1)], [-arm_coords_twisted.item(2)]]) #axes for arm are other way round to that of checkerboard
+        arm_pos_list.append(arm_coords)
+    """
 
     xlim = [-0.4,0.4] # x allowable range
     ylim = [-0.22, -0.6] # y allowable range

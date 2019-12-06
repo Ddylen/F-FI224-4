@@ -2,16 +2,17 @@
 
 import cv2
 import pickle
+import time
 
 
 images = []
-datafile = open("depthdata/COLOUR11.15.13.49.pickle", "rb")
+datafile = open("depthdata/COLOUR12.3.14.50.pickle", "rb")
 
 frame = pickle.load(datafile)
 height, width, channels = frame.shape
 #print(height)
 #print(width)
-out = cv2.VideoWriter('videos/output66.avi', cv2.VideoWriter_fourcc(*'DIVX'), 10, (int(width), int(height))) #TODO: look in to why I have to say 30fs or else it goes to slow
+out = cv2.VideoWriter('videos/staystill.avi', cv2.VideoWriter_fourcc(*'DIVX'), 10, (int(width), int(height))) #TODO: look in to why I have to say 30fs or else it goes to slow
 
 #frame = cv2.imread(im0)
 #print(type(frame))
@@ -22,7 +23,6 @@ cv2.imshow('video',frame)
 
 
 # Define the codec and create VideoWriter object
-
 while True:
     try:
         frame = pickle.load(datafile)
@@ -31,6 +31,7 @@ while True:
         #print(frame.shape)
         out.write(frame)
         cv2.imshow('video',frame)
+        time.sleep(0.1)
         if (cv2.waitKey(1) & 0xFF) == ord('q'): # Hit `q` to exit
             break
     except EOFError:
