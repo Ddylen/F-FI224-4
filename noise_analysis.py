@@ -16,6 +16,10 @@ palmpoints, closedpoints, thumbpoints = interpret2D('vid0611HAND', 'hand')
 xL, yL, cL = zip(*thumbpoints) #extract individual lists from a list of tuples
 #print(xL)
 #plt.axis([0,1000,0,1000])
+#xL = xL .* 9.67
+#yL = yL .* 1.37
+xL = tuple(i*9.67 for i in xL)
+yL = tuple(i*1.37 for i in yL)
 
 plt.scatter(xL, yL)
 

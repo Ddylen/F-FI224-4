@@ -1,8 +1,26 @@
 # -*- coding: utf-8 -*-
 """
+Created on Mon Jan 13 10:13:08 2020
+
+@author: birl
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Fri Nov 29 13:04:35 2019
 
 @author: birl
+"""
+
+# -*- coding: utf-8 -*-
+"""
+Code for smoothly following a human demonstrator in 3D
+TODO: NOT FINISED YET
+TASKS:
+   
+    6) Review my coordinate trasnforms and check the paths I get out of some test code look sensible
+    
+COLOR AND DEPTH CAMERAS HAVE DIFFERENT FIELDS OF VIEW, FIGURE OUT HOW TO ACCOUNT FOR THAT!!!!!!!!!!!!!!!!!!!!
 """
 
 import sys
@@ -15,7 +33,6 @@ import pickle
 import waypoints as wp
 from kg_robot import kg_robot
 from reader import interpret2D
-from reader import raw_interpret2D
 from convert_2_world import convert_2_world
 import specialised_kg_robot_example as kgrs 
 from convert_to_arm_coords import convert_to_arm_coords
@@ -44,7 +61,7 @@ SOMETHING IS GOINT WRONG IN SCALING WITH HEIGHT
 def main():
     frame_rate = 0.1 
     #palm_list = interpret2D('staystill', 'wrist')
-    palm_list = raw_interpret2D('circle', 'wrist')
+    palm_list = interpret2D('circle', 'wrist')
     if len(palm_list) == 0:
         print("JSON FILE NAME INVALID")
         raise ImportError
@@ -55,39 +72,31 @@ def main():
     arm_y_list = []
     arm_z_list = []
 
-    kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Color | PyKinectV2.FrameSourceTypes_Depth)
+    kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Color | PyKinectV2.FrameSourceTypes_Depth | PyKinectV2.FrameSourceTypes_Infrared)
     color2depth_points_type = _DepthSpacePoint* np.int(1920 * 1080)
     color2depth_points = ctypes.cast(color2depth_points_type(), ctypes.POINTER(_DepthSpacePoint))
     
     #depthdatafile = open("depthdata/DEPTH12.3.14.50.pickle", "rb")
     depthdatafile = open("depthdata/DEPTH11.19.16.50.pickle", "rb")
+    colourdatafile = open("depthdata/COLOUR11.19.16.50.pickle", "rb")
     x_scale_factor = math.sin(math.radians(42.05)) # Using FoV spec, this is the maximum object size that fits in half of FoV horizonally at 1m away
     y_scale_factor = math.sin(math.radians(26.9)) # Using FoV spec, this is the maximum object size that fits in half of FoV vertically at 1m away
     i = -1
     for val in palm_list:
         i = i+1
-        lost_track = False
-        if val[0] ==0 and val[1] ==0:
-            lost_track = True
         x_normalised =val[0]
         y_normalised = val[1] # these are X and Y in terms of the normalised pixel value they are at
         #print(x_normalised, y_normalised)
         depthframe = pickle.load(depthdatafile) #need to do this once per frame
-        ctypes_depth_frame = np.ctypeslib.as_ctypes(depthframe.flatten())
+        colourframe = pickle.load(colourdatafile)
+        ctypes_depth_frame = np.reshape(depthframe, 424*512)
+        ctypes_depth_frame = np.ctypeslib.as_ctypes(ctypes_depth_frame)
         #print(depthframe[1001])
         #print(type(ctypes_depth_frame[1001]))
         #print(ctypes_depth_frame[1001])
         kinect._mapper.MapColorFrameToDepthSpace(ctypes.c_uint(512 * 424), ctypes_depth_frame, ctypes.c_uint(1920 * 1080), color2depth_points)
-        
-        #x_normalised = 0.5
-        #y_normalised = 0.5
-        
-        read_pos = int((x_normalised)*1920)+int((y_normalised)*1080)*1920 -1
-        x_pixels = color2depth_points[read_pos].x
-        y_pixels = color2depth_points[read_pos].y
-
-        #print(x_pixels, y_pixels, read_pos, int(x_normalised*1920), int(y_normalised*1080))
-        
+        x_pixels = color2depth_points[int(x_normalised)*1920+int(y_normalised)-1].x
+        y_pixels = color2depth_points[int(x_normalised) * 1920+int(y_normalised)-1].y
         #x_pixels, y_pixels  = convertcolourpixeltoIR2(x_normalised, y_normalised, ctypes_depth_frame)
         #x_pixels, y_pixels  = convertcolourpixeltoIR2(x_normalised*1920, y_normalised*1080)
         #print(x_normalised, y_normalised)
@@ -108,15 +117,8 @@ def main():
         frame = depthframe
         frame = frame.astype(np.uint8)
         frame = np.reshape(frame, (424, 512))
-        try:
-            if lost_track == False:
-                pos_previous = (int(x_pixels), int(y_pixels))
-                cv2.circle(frame, (int(x_pixels), int(y_pixels)), 10, (255, 0, 255), -1)
-            else:
-                cv2.circle(frame, pos_previous, 25, (200, 0, 200), -1)
-        except:
-            print("infinity seen")
-        cv2.imshow('KINECT Video Stream', frame)
+        cv2.circle(colourframe, (int(x_normalised*1920), int(y_normalised*1080)), 10, (255, 0, 255), -1)
+        cv2.imshow('KINECT Video Stream', colourframe)
         time.sleep(0.1)
         key = cv2.waitKey(1)
         if key == 27: 
@@ -165,12 +167,12 @@ def main():
     y_sec= []
     z_sec = []
     for pos in arm_pos_list:
-        #print(type(pos))
+        print(type(pos))
         if pos[0] != -111:
             x_sec.append(pos[0])
             y_sec.append(pos[1])
             z_sec.append(pos[2])
-        #print(pos[0],pos[1], pos[2])
+        print(pos[0],pos[1], pos[2])
     
     fig = plt.figure()
     ax = Axes3D(fig)

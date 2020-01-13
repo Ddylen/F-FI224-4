@@ -5,6 +5,10 @@ Created on Tue Dec  3 14:24:06 2019
 @author: birl
 """
 import numpy as np
+from pykinect2 import PyKinectV2
+from pykinect2.PyKinectV2 import *
+from pykinect2 import PyKinectRuntime
+import ctypes
 
 def convertcolourpixeltoIR(x,y):
     
@@ -13,3 +17,4 @@ def convertcolourpixeltoIR(x,y):
     homogeneousIR = T *homogeneouscolourvec
     print(homogeneousIR.item(0), homogeneousIR.item(1), homogeneousIR.item(2))
     return homogeneousIR.item(0), homogeneousIR.item(1)
+    
