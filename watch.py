@@ -10,7 +10,8 @@ import cv2
 import pickle
 import datetime
 import time 
-import subprocess
+
+from Bin.openposefrompythontest import  run_openpose 
 
 """ 
 TO DO
@@ -112,7 +113,7 @@ def frames_to_video(FILE_NAME):
     height, width, channels = frame.shape
     
     #define video properties
-    out = cv2.VideoWriter('videos/' + FILE_NAME + '.avi', cv2.VideoWriter_fourcc(*'DIVX'), 10, (int(width), int(height))) 
+    out = cv2.VideoWriter('Bin/videos/' + FILE_NAME + '.avi', cv2.VideoWriter_fourcc(*'DIVX'), 10, (int(width), int(height))) 
     
     #display first frame on a screen for progress (some duplication of later code as first frame needs to be loaded seperately to the rest so we can get the frame dimensions from it)
     out.write(frame)
@@ -134,9 +135,6 @@ def frames_to_video(FILE_NAME):
     out.release()
     cv2.destroyAllWindows()
 
-def run_openpose(FILE_NAME):
-    #command_string = 'bin/OpenPoseDemo.exe --video videos/' + FILE_NAME + '.avi --write_video ' + FILE_NAME + '.Tagged.avi --write_json JSON/' + FILE_NAME + '/ --keypoint_scale 3'
-    #os.system(command_string)
 
 def watch():
     """Main function, call to start recording data"""
@@ -144,7 +142,7 @@ def watch():
     file_name = str(currentdate.month) + "." + str(currentdate.day) + "."+ str(currentdate.hour) + "."+ str(currentdate.minute)
     save_frames(file_name)
     frames_to_video(file_name)
-    run_openpose(FILE_NAME)
+    run_openpose(file_name)
     
 if __name__ == "__main__":
-    watch()
+    run_openpose('stirshort')

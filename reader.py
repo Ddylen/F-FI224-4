@@ -88,7 +88,7 @@ def interpret2D(folder, mode):
         
 def raw_interpret2D(folder, mode):
     #path = 'outputs/*.json'
-    path = 'JSON/' + folder + '/*.json'
+    path = 'bin/JSON/' + folder + '/*.json'
     text_files = glob.glob(path)
     json_list = []
     wrist_list = []

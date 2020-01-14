@@ -43,7 +43,6 @@ SOMETHING IS GOINT WRONG IN SCALING WITH HEIGHT
 
 def main():
     frame_rate = 0.1 
-    #palm_list = interpret2D('staystill', 'wrist')
     palm_list = raw_interpret2D('circle', 'wrist')
     if len(palm_list) == 0:
         print("JSON FILE NAME INVALID")
