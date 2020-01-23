@@ -8,9 +8,12 @@ from pykinect2.PyKinectV2 import *
 from pykinect2 import PyKinectRuntime
 import numpy as np
 import cv2
+import ctypes
+
 
 kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Depth)
 frameslist = []
+
 while True:
     # --- Getting frames and drawing
     if kinect.has_new_depth_frame():
@@ -22,14 +25,13 @@ while True:
         frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
         def click_event(event, x, y, flags, param):
             if event == cv2.EVENT_LBUTTONDOWN:
-                print("pos is ", x, y)
-            if event == cv2.EVENT_RBUTTONDOWN:
                 Pixel_Depth = frameD[((y * 512) + x)] # we need to specify pixel number, not x,y coordinates
                 print("pos is ", x, y, "depth is ", Pixel_Depth)
         ##output = cv2.bilateralFilter(output, 1, 150, 75)
         cv2.imshow('KINECT Video Stream', frame)
         cv2.setMouseCallback('KINECT Video Stream', click_event)
         output = None
+        
 
     key = cv2.waitKey(1)
     if key == 27: break

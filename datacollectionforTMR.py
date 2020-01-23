@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jan 15 16:47:39 2020
+
+@author: birl
+"""
+
 import sys
 sys.path.insert(1,r'C:\Users\birl\Documents\ur5_python_host\ur5_kg_robot')
 import numpy as np
@@ -14,13 +21,15 @@ from pykinect2.PyKinectV2 import *
 from pykinect2 import PyKinectRuntime
 import ctypes
 import math
+import pickle
 
+#figure of 8 is 1.15.17.43
 def convert_2_world(camera_coords):
     """Convert Camera coordinates to world coordinates"""
     
-    rotation_matrix = np.matrix([[-0.0351,0.9976, -0.0591 ],[-0.8758, -0.0022, 0.4827],[0.4814, 0.0687,  0.8738]])
+    rotation_matrix = np.matrix([[-0.0060 , 1.0000, -0.0057],[-0.6635, 0.0002,  0.7481],[0.7481, 0.0083, 0.6635]])
     inv_rotation_matrix = rotation_matrix.getI()
-    translation_vector = np.matrix([[-0.2839],	[-0.0663],	[-1.1089]])
+    translation_vector = np.matrix([[-0.6859216],	[-0.1578426],	[-0.9921875]])
     shifted_vector = camera_coords - translation_vector
     world_coords = inv_rotation_matrix*shifted_vector
     fine_tune = np.matrix([[0],	[0],	[0]])
@@ -42,6 +51,13 @@ def convert_to_arm_coords(x_input, y_input, z_input, return_depth = False):
     else:
         return outputmat
     
+def std_3D(datalist):
+    #print(datalist[0])
+    mean_x = np.mean([x[0] for x in datalist])
+    mean_y = np.mean([x[1] for x in datalist])
+    mean_z = np.mean([x[2] for x in datalist])
+    std = np.std([np.sqrt((x[0]-mean_x)**2+(x[1]-mean_y)**2+(x[2]-mean_z)**2) for x in datalist])
+    return std
     
 def main():
     """NEEDS A KINECT CONNECTED TO WORK"""
@@ -51,8 +67,12 @@ def main():
     #filename = "1.14.11.40"
     #filename = "1.14.13.46"
     #filename = "1.14.18.4"
-    filename = "1.15.17.43"
-    elbow_list, palm_list = raw_interpret2D(filename, 'wrist')
+    #filename = "1.15.11.29"
+    filename = "1.15.17.31"
+    elbow_list, wrist_list = raw_interpret2D(filename, 'wrist')
+    palm_list, thumb_list, index_end_list = raw_interpret2D(filename, 'hand')
+    
+
     if len(palm_list) == 0:
         print("JSON FILE NAME INVALID")
         raise ImportError
@@ -84,9 +104,19 @@ def main():
 
 
     i = -1
+    elbow_3D = []
+    wrist_3D= []
+    palm_3D = []
+    thumb_3D = []
+    index_3D = []
     for val in palm_list:
         i = i+1
-        
+        tracked_points= []
+        tracked_points.append((elbow_list[i][0], elbow_list[i][1]))
+        tracked_points.append((wrist_list[i][0], wrist_list[i][1]))
+        tracked_points.append((palm_list[i][0], palm_list[i][1]))
+        tracked_points.append((thumb_list[i][0], thumb_list[i][1]))
+        tracked_points.append((index_end_list[i][0], index_end_list[i][1]))
         # Get normalised X and Y of the joint in the colour image
         x_normalised =val[0]
         y_normalised = val[1] 
@@ -105,22 +135,24 @@ def main():
         L = depthframe.size
         
         kinect._mapper.MapColorFrameToDepthSpace(ctypes.c_uint(512 * 424), ctypes_depth_frame, ctypes.c_uint(1920 * 1080), color2depth_points)
+        kinect._mapper.MapColorFrameToCameraSpace(L, ctypes_depth_frame, S, csps1)
+        
+        tracked_points_3D = []
+        
         read_pos = int((x_normalised)*1920)+int((y_normalised)*1080)*1920 -1
         
-        kinect._mapper.MapColorFrameToCameraSpace(L, ctypes_depth_frame, S, csps1)
-        x_3D = csps1[int(y_normalised*1080)*1920 + int(x_normalised*1920)].x
-        y_3D = csps1[int(y_normalised*1080)*1920 + int(x_normalised*1920)].y
-        z_3D = csps1[int(y_normalised*1080)*1920 + int(x_normalised*1920)].z
-        
-        #filter out infinite values and massive outliers
-        if x_3D != (np.inf or -np.inf) and abs(x_3D)<10 and abs(y_3D)<10 and abs(z_3D)<10:
-            if z_3D > 0.5 and z_3D< 2:
-            #measured_pos_list.append((x_3D,y_3D, z_3D))
-                camera_x_list.append(x_3D)
-                camera_y_list.append(y_3D)
-                camera_z_list.append(z_3D)
+        for val in tracked_points:
             
-        print(x_3D,y_3D,z_3D)
+            x_3D = csps1[int(val[1]*1080)*1920 + int(val[0]*1920)].x
+            y_3D = csps1[int(val[1]*1080)*1920 + int(val[0]*1920)].y
+            z_3D = csps1[int(val[1]*1080)*1920 + int(val[0]*1920)].z
+            
+            #filter out infinite values and massive outliers
+            if x_3D != (np.inf or -np.inf):
+                #measured_pos_list.append((x_3D,y_3D, z_3D))
+                tracked_points_3D.append((x_3D, y_3D, z_3D))
+    
+    
         #Try except loop as we sometimes get back infinity from the function below causing knock-on errors
         try:
             x_pixels = int(color2depth_points[read_pos].x)
@@ -134,8 +166,7 @@ def main():
         frame = frame.astype(np.uint8)
         frame = np.reshape(frame, (424, 512))
         
-        #extract the depth of the tracked joint
-        #joint_depth = ctypes_depth_frame[int(x_pixels)+int(y_pixels)*512]
+
         #print(joint_depth)
         
         
@@ -158,8 +189,9 @@ def main():
         if key == 27: 
             pass
         
+        """
         #Convert joints to arm coordinates
-        arm_coords = convert_to_arm_coords(x_3D,y_3D,z_3D, True)
+        arm_coords = convert_to_arm_coords(palm_x_3D,palm_y_3D,palm_z_3D, True)
         arm_coords_list_form = [arm_coords.item(0), arm_coords.item(1), arm_coords.item(2)]
         if arm_coords.item(0) != -111:
             arm_x_list.append(arm_coords.item(0))
@@ -167,10 +199,33 @@ def main():
             arm_z_list.append(arm_coords.item(2))
     
         arm_pos_list.append(arm_coords_list_form)
-        
+        """
+        elbow_3D.append(tracked_points_3D[0])
+        wrist_3D.append(tracked_points_3D[1])
+        palm_3D.append(tracked_points_3D[2])
+        thumb_3D.append(tracked_points_3D[3])
+        index_3D.append(tracked_points_3D[4])
     # Release everything if job is finished
     cv2.destroyAllWindows()
-
+    
+    elbowfile = open("elbow.pickle", 'wb')
+    wristfile = open("wrist.pickle", 'wb')
+    palmfile = open("palm.pickle", 'wb')
+    thumbfile = open("thumb.pickle", 'wb')
+    indexfile = open("index.pickle", 'wb')
+    pickle.dump(elbow_3D, elbowfile)
+    pickle.dump(wrist_3D, wristfile)
+    pickle.dump(palm_3D, palmfile)
+    pickle.dump(thumb_3D, thumbfile)
+    pickle.dump(index_3D, indexfile)
+    
+    print
+    print("elbow", std_3D(elbow_3D))
+    print("wrist", std_3D(wrist_3D))
+    print("palm", std_3D(palm_3D))
+    print("thunb", std_3D(thumb_3D))
+    print("index", std_3D(index_3D))
+    
     #Lists to store the valid arm positions found
     x_sec= []
     y_sec= []
@@ -189,8 +244,8 @@ def main():
     
     fig = plt.figure()
     ax = Axes3D(fig)
-    ax.scatter(camera_x_list, camera_y_list, camera_z_list)
-    #ax.scatter(arm_x_list, arm_y_list, arm_z_list)
+    #ax.scatter(camera_x_list, camera_y_list, camera_z_list)
+    ax.scatter(arm_x_list, arm_y_list, arm_z_list)
     plt.draw()
     
     

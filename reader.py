@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 import os
 parentDirectory = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-
+from enum import Enum
 
 def interpret2D(folder, mode):
     #path = 'outputs/*.json'
@@ -92,6 +92,7 @@ def raw_interpret2D(folder, mode):
     text_files = glob.glob(path)
     json_list = []
     wrist_list = []
+    elbow_list = []
     x_list = []
     y_list = []
     confidence_list = []
@@ -113,6 +114,7 @@ def raw_interpret2D(folder, mode):
                     y= json_dict['people'][0].get('pose_keypoints_2d')[13]
                     c= json_dict['people'][0].get('pose_keypoints_2d')[14]
                     
+                    elbow_list.append((json_dict['people'][0].get('pose_keypoints_2d')[9], json_dict['people'][0].get('pose_keypoints_2d')[10], json_dict['people'][0].get('pose_keypoints_2d')[11]))
                     wrist_list.append((x, y, c))
                     x_list.append(x)
                     y_list.append(y)
@@ -129,13 +131,14 @@ def raw_interpret2D(folder, mode):
             except:
                 continue
             
-        return(wrist_list)
+        return(elbow_list, wrist_list)
             
     if (mode == 'hand'):
         thumb_list = []
         index_joint2_list = []
         thumb_joint1_list = []
         palm_list = []
+        index_end_list =[]
         closed_list = [0]
         for json_dict in json_list:
             try:
@@ -145,7 +148,7 @@ def raw_interpret2D(folder, mode):
                     thumb_list.append((json_dict['people'][0].get('hand_right_keypoints_2d')[12],json_dict['people'][0].get('hand_right_keypoints_2d')[13], json_dict['people'][0].get('hand_right_keypoints_2d')[14]))
                     index_joint2_list.append((json_dict['people'][0].get('hand_right_keypoints_2d')[18],json_dict['people'][0].get('hand_right_keypoints_2d')[19], json_dict['people'][0].get('hand_right_keypoints_2d')[19]))
                     thumb_joint1_list.append((json_dict['people'][0].get('hand_right_keypoints_2d')[6],json_dict['people'][0].get('hand_right_keypoints_2d')[7], json_dict['people'][0].get('hand_right_keypoints_2d')[8]))
-                    
+                    index_end_list.append((json_dict['people'][0].get('hand_right_keypoints_2d')[24],json_dict['people'][0].get('hand_right_keypoints_2d')[25], json_dict['people'][0].get('hand_right_keypoints_2d')[26]))
             
             
                 #print("thumb is", thumb_list[-1], "joint is ", index_joint2_list[-1])
@@ -163,16 +166,105 @@ def raw_interpret2D(folder, mode):
             except(TypeError):
                 print("stored value is not an int")
             #print(palm_list)
-        return palm_list, closed_list, index_joint2_list
-        
+        return palm_list, thumb_list, index_end_list
 
-
-
-if __name__ == "__main__":    
-    import numpy as np
-    palmpoints, closedpoints = interpret2D('vid0611HAND', 'hand')
+class HAND(Enum):
+    """Enum of what hand joint numbers *3 represent"""
+    PALM = 0
+    BELOW_THUMB = 1
+    THUMB_KUNCKLE = 2
+    THUMB_JOINT_1 = 3
+    THUMB_TIP = 4
+    INDEX_KNUCKLE = 5
+    INDEX_JOINT_1 = 6
+    INDEX_JOINT_2 = 7
+    INDEX_TIP = 8
+    MIDDLE_KNUCKLE = 9
+    MIDDLE_JOINT_1= 10
+    MIDDLE_JOINT_2 = 11
+    MIDDLE_TIP =12
+    RING_KNUCKLE = 13
+    RING_JOINT_1 = 14
+    RING_JOINT_2 = 15
+    RING_TIP = 16
+    PINKIE_KNUCKLE = 17
+    PINKIE_JOINT_1 = 18
+    PINKIE_JOINT_2 = 19
+    PINKIE_TIP = 20
     
-    xL, yL, cL = zip(*palmpoints)
-    print(xL)
+class BODY(Enum):
+    """Enum of what body joint numbers *3 represent"""
+    HEAD = 0
+    CHEST = 1
+    LEFT_ARM = 2
+    LEFT_ELBOW = 3
+    LEFT_WRIST = 4
+    RIGHT_SHOULDER = 5
+    RIGHT_ELBOW = 6
+    RIGHT_WRIST = 7
+    PELVIS = 8
+    LEFT_HIP = 9
+    LEFT_KNEE = 10
+    LEFT_FOOT = 11
+    RIGHT_HIP = 12
+    RIGHT_KNEE = 13
+    RIGHT_FOOT = 14
+    LEFT_EYE= 15
+    RIGHT_EYE = 16
+    LEFT_EAR = 17
+    RIGHT_EAR = 18
+    
+def track_body(folder):
+    """function for returning all tracked points on the human body"""
+    
+    path = 'bin/JSON/' + folder + '/*.json'
+    
+    text_files = glob.glob(path)
+    json_list = []
+    
+    body_tracked_joints_num = 0
+    for body_joint in BODY:
+        body_tracked_joints_num += 1
+    
+    hand_tracked_joints_num = 0
+    for hand_joint in HAND:
+        hand_tracked_joints_num += 1
+
+    left_hand_2D_pose = [ [] for i in range(hand_tracked_joints_num)]
+    right_hand_2D_pose = [ [] for i in range(hand_tracked_joints_num)]
+    body_2D_pose = [ [] for i in range(body_tracked_joints_num)]
+    
+    for JSON in text_files:
+        with open(JSON, "r") as json_data:
+            json_list.append(json.load(json_data))
+    for json_dict in json_list:
+        count = 0
+        try:
+            for body_joint in BODY:
+                body_2D_pose[count].append([json_dict['people'][0].get('pose_keypoints_2d')[body_joint.value], json_dict['people'][0].get('pose_keypoints_2d')[body_joint.value+1], json_dict['people'][0].get('pose_keypoints_2d')[body_joint.value+2]])
+                count = count + 1
+            
+            for hand_joint in HAND:
+                right_hand_2D_pose[hand_joint.value].append([json_dict['people'][0].get('hand_right_keypoints_2d')[hand_joint.value], json_dict['people'][0].get('hand_right_keypoints_2d')[hand_joint.value+1], json_dict['people'][0].get('hand_right_keypoints_2d')[hand_joint.value+2]])
+                left_hand_2D_pose[hand_joint.value].append([json_dict['people'][0].get('hand_left_keypoints_2d')[hand_joint.value], json_dict['people'][0].get('hand_left_keypoints_2d')[hand_joint.value+1], json_dict['people'][0].get('hand_left_keypoints_2d')[hand_joint.value+2]])
+        except IndexError:
+            for body_joint in BODY:
+                body_2D_pose[count].append([0,0,-1])
+                count = count + 1
+            
+            for hand_joint in HAND:
+                right_hand_2D_pose[hand_joint.value].append([0,0,-1])
+                left_hand_2D_pose[hand_joint.value].append([0,0,-1])
+        
+    return body_2D_pose, left_hand_2D_pose, right_hand_2D_pose
+   
+    
+if __name__ == "__main__":    
+    #import numpy as np
+    #palmpoints, closedpoints = interpret2D('vid0611HAND', 'hand')
+    
+    #xL, yL, cL = zip(*palmpoints)
+    #print(xL)
     #plt.axis([0,1000,0,1000])
     #plt.scatter(xL, yL)
+    track_body('1.23.17.49')

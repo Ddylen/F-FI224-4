@@ -1,3 +1,17 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jan 15 18:13:27 2020
+
+@author: birl
+"""
+
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jan 15 18:09:12 2020
+
+@author: birl
+"""
+
 import sys
 sys.path.insert(1,r'C:\Users\birl\Documents\ur5_python_host\ur5_kg_robot')
 import numpy as np
@@ -18,9 +32,9 @@ import math
 def convert_2_world(camera_coords):
     """Convert Camera coordinates to world coordinates"""
     
-    rotation_matrix = np.matrix([[-0.0351,0.9976, -0.0591 ],[-0.8758, -0.0022, 0.4827],[0.4814, 0.0687,  0.8738]])
+    rotation_matrix = np.matrix([[-0.0060 , 1.0000, -0.0057],[-0.6635, 0.0002,  0.7481],[0.7481, 0.0083, 0.6635]])
     inv_rotation_matrix = rotation_matrix.getI()
-    translation_vector = np.matrix([[-0.2839],	[-0.0663],	[-1.1089]])
+    translation_vector = np.matrix([[-0.6859216],	[-0.1578426],	[-0.9921875]])
     shifted_vector = camera_coords - translation_vector
     world_coords = inv_rotation_matrix*shifted_vector
     fine_tune = np.matrix([[0],	[0],	[0]])
@@ -51,7 +65,7 @@ def main():
     #filename = "1.14.11.40"
     #filename = "1.14.13.46"
     #filename = "1.14.18.4"
-    filename = "1.15.17.43"
+    filename = "1.15.18.14"
     elbow_list, palm_list = raw_interpret2D(filename, 'wrist')
     if len(palm_list) == 0:
         print("JSON FILE NAME INVALID")
