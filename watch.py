@@ -15,10 +15,8 @@ from Bin.openposefrompythontest import  run_openpose
 
 """ 
 TO DO
-* get Openpose demo working, seem to recall I fixed it last time by reinstalling
 * Get frame recording times to exactly 10FPS, not the 9.5-10.5 I see often currently
 * Check recordings play back at the same speed as I record them
-* Get simple/ rationalise/ documented noise collection/ imitation solution
 """
 
 
