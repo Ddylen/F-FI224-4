@@ -164,9 +164,12 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
     right_hand_3D_pose = [ [] for i in range(hand_tracked_joints_num)]
     body_3D_pose = [ [] for i in range(body_tracked_joints_num)]
     
+    print("Total number of frames is ", len(body_2D_pose[0]))
     #Iterate over each frame
     for framenum in range(len(body_2D_pose[0])):
         
+        if framenum%100 == 0:
+            print("Reached frame ", framenum)
         depthframe = pickle.load(depthdatafile) #need to do this once per frame
         
         #Carry out certain actions if you want an image of where all the tracked joints are (20x slower)
