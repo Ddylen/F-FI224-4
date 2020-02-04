@@ -48,10 +48,10 @@ def convert_to_arm_coords(x_input, y_input, z_input):
     board_coords = convert_2_world(x_input, y_input, z_input)
     
     #measure distance from checkboard origin to arm origin
-    board_to_arm_translation = np.matrix([[0.09,-0.475,-0.418]])
+    board_to_arm_translation = np.matrix([[0.09,-0.475,-0.018]])
     
     #Add some adition fine tuning parameters
-    fine_tune_2 = np.matrix([[-0.035, -0.015, 0.018]])
+    fine_tune_2 = np.matrix([[-0.055, 0.01, 0.018]])
     
     #Move origin to the arm's origin
     arm_coords = board_coords + board_to_arm_translation + fine_tune_2

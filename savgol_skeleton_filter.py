@@ -1,3 +1,17 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Feb  2 14:41:30 2020
+
+@author: birl
+"""
+
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jan 31 15:06:32 2020
+
+@author: birl
+"""
+
 import numpy as np
 import time
 import matplotlib.pyplot as plt
@@ -6,11 +20,10 @@ import mpl_toolkits.mplot3d as plt3d
 import matplotlib.animation as animation
 
 from get_3D_pose import HAND, BODY, get_arm_3D_coordinates
+from scipy import signal
 
 #'1.24.21.47'
-
-BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE = get_arm_3D_coordinates('upperrightdot.31.1.15.46', confidence_threshold = 0)
-#BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE = get_arm_3D_coordinates('1.23.17.49', confidence_threshold = 0)
+BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE = get_arm_3D_coordinates('1.23.17.49', confidence_threshold = 0)
 #BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE = get_arm_3D_coordinates('1.24.21.39', confidence_threshold = 0)
 
 x_upper_limit = 0.75
@@ -23,34 +36,36 @@ z_upper_limit = 0.5
 z_lower_limit = -1
 
 
-def filter_out_jumps(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose, threshold = 100):
+
+
+def savgol_filter(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose, threshold = 1):
      count= 0
      #print(range(len(body_3D_pose[0])))
+     
+     window_length, polyorder = 31, 2
+     
+     
      too_big_distance_list = []
-     for frame_num in range(len(body_3D_pose[0])):
-        #print(frame_num)
-        for hand_pose in right_hand_3D_pose, left_hand_3D_pose:
-            for joint in HAND:
-                if frame_num != 0:
-                    move_distance = np.sqrt((hand_pose[joint.value][frame_num][0] - hand_pose[joint.value][frame_num-1][0])**2+(hand_pose[joint.value][frame_num][1]-hand_pose[joint.value][frame_num-1][1])**2 + (hand_pose[joint.value][frame_num][2]-hand_pose[joint.value][frame_num-1][2])**2)
-                    if move_distance >= threshold:
-                        hand_pose[joint.value][frame_num][3] = True
-                        hand_pose[joint.value][frame_num-1][3] = True
-                        too_big_distance_list.append(move_distance)
-                        #print("hand fired ", count)
-                        count  +=1
+     for hand_pose in right_hand_3D_pose, left_hand_3D_pose:
+         for joint in HAND:
+             #print(list(zip(*hand_pose[joint.value])), window_length, polyorder)
+             x_filtered = signal.savgol_filter(list(zip(*hand_pose[joint.value]))[0], window_length, polyorder)
+             y_filtered = signal.savgol_filter(list(zip(*hand_pose[joint.value]))[1], window_length, polyorder)
+             z_filtered = signal.savgol_filter(list(zip(*hand_pose[joint.value]))[2], window_length, polyorder)
+             lost_track_list = [False] *len(list(zip(*hand_pose[joint.value]))[3])
+             smoothed_list = [list(elem) for elem in list(zip(x_filtered,y_filtered,z_filtered, lost_track_list))]
+             #print(smoothed_list[0])
+             hand_pose[joint.value] = smoothed_list
+             
+     for joint in BODY:
+             x_filtered = signal.savgol_filter(list(zip(*body_3D_pose[joint.value]))[0], window_length, polyorder)
+             y_filtered = signal.savgol_filter(list(zip(*body_3D_pose[joint.value]))[1], window_length, polyorder)
+             z_filtered = signal.savgol_filter(list(zip(*body_3D_pose[joint.value]))[2], window_length, polyorder)
+             lost_track_list = [False] *len(list(zip(*hand_pose[joint.value]))[3])
+             smoothed_list = [list(elem) for elem in list(zip(x_filtered,y_filtered,z_filtered, lost_track_list))]
+             body_3D_pose[joint.value] = smoothed_list
+        
     
-        for joint in BODY:
-            if frame_num != 0:
-                move_distance = np.sqrt((body_3D_pose[joint.value][frame_num][0] - body_3D_pose[joint.value][frame_num-1][0])**2+(body_3D_pose[joint.value][frame_num][1]-body_3D_pose[joint.value][frame_num-1][1])**2 + (body_3D_pose[joint.value][frame_num][2]-body_3D_pose[joint.value][frame_num-1][2])**2)
-                if move_distance >= threshold:
-                    body_3D_pose[joint.value][frame_num][3] = True
-                    body_3D_pose[joint.value][frame_num-1][3] = True
-                    too_big_distance_list.append(move_distance)
-                    #print("body fired ", count)
-                    count +=1 
-    
-     #print(sorted(too_big_distance_list))
      print("Total number of filtered points is", len(too_big_distance_list))
      return body_3D_pose, left_hand_3D_pose,right_hand_3D_pose
     
@@ -58,7 +73,7 @@ def get_plot_list(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose):
     
     print("filter started")
     
-    body_3D_pose, left_hand_3D_pose,right_hand_3D_pose = filter_out_jumps(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose)
+    body_3D_pose, left_hand_3D_pose,right_hand_3D_pose = savgol_filter(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose)
     
     print("filter finished")
     
@@ -154,9 +169,7 @@ def get_plot_list(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose):
     return results_list
 
 
-#print(len(results_list[5]))
-#print(results_list[5])
-old_time = time.time()
+
 
 def update_lines(frame_num, lines):
     #print(time.time())
@@ -202,34 +215,40 @@ def update_lines(frame_num, lines):
     
     ax.set_zlabel('Z')
     return lines
+
+
+
+if __name__ == '__main__': 
     
+    #print(len(results_list[5]))
+    #print(results_list[5])
+    old_time = time.time()
+    # Attaching 3D axis to the figure
+    fig = plt.figure()
+    ax = p3.Axes3D(fig)
     
-# Attaching 3D axis to the figure
-fig = plt.figure()
-ax = p3.Axes3D(fig)
-
-results_list = get_plot_list(BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE)
-lines = [ax.plot(l[0], l[1], l[2])[0] for l in results_list[1]]
-
-  
-# Setting the axes properties
-ax.set_xlim3d([x_lower_limit, x_upper_limit])
-ax.set_xlabel('X')
-
-ax.set_ylim3d([y_lower_limit, y_upper_limit])
-ax.set_ylabel('Y')
-
-ax.set_zlim3d([z_lower_limit, z_upper_limit])
-ax.set_zlabel('Z')
-
-ax.set_title('Skeleton Tracking')
-
-# Creating the Animation object
-#len(body_3D_pose[0])
-ani = animation.FuncAnimation(fig, update_lines, len(BODY3DPOSE[0]), fargs = [lines],
-                                   interval=100, blit=False, repeat = True)
-Writer = animation.writers['ffmpeg']
-writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
-ani.save('ani.mp4', writer=writer)
-
-plt.show()
+    results_list = get_plot_list(BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE)
+    lines = [ax.plot(l[0], l[1], l[2])[0] for l in results_list[1]]
+    
+      
+    # Setting the axes properties
+    ax.set_xlim3d([x_lower_limit, x_upper_limit])
+    ax.set_xlabel('X')
+    
+    ax.set_ylim3d([y_lower_limit, y_upper_limit])
+    ax.set_ylabel('Y')
+    
+    ax.set_zlim3d([z_lower_limit, z_upper_limit])
+    ax.set_zlabel('Z')
+    
+    ax.set_title('Skeleton Tracking')
+    
+    # Creating the Animation object
+    #len(body_3D_pose[0])
+    ani = animation.FuncAnimation(fig, update_lines, len(BODY3DPOSE[0]), fargs = [lines],
+                                       interval=100, blit=False, repeat = True)
+    Writer = animation.writers['ffmpeg']
+    writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
+    ani.save('ani.mp4', writer=writer)
+    
+    plt.show()

@@ -13,6 +13,7 @@ import glob
 import os
 parentDirectory = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 from enum import Enum
+import math
 
 from pykinect2 import PyKinectV2
 from pykinect2.PyKinectV2 import *
@@ -169,7 +170,7 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
     for framenum in range(len(body_2D_pose[0])):
         
         if framenum%100 == 0:
-            print("Reached frame ", framenum)
+            print("Finding points in frame ", framenum)
         depthframe = pickle.load(depthdatafile) #need to do this once per frame
         
         #Carry out certain actions if you want an image of where all the tracked joints are (20x slower)
@@ -210,6 +211,16 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                     lost_track = False
                     
                 else:
+                    lost_track = True
+                    
+                if position == [-1,-1,-1]:
+                    lost_track = True
+                
+                if position == [0,0,0]: #what openpose returns if it cant see
+                    lost_track = True
+                    
+                if math.isinf(position[0]) == True or math.isinf(position[1]) == True or math.isinf(position[2]) == True or math.isnan(position[0]) == True or math.isnan(position[1]) == True or math.isnan(position[2]) == True:
+                    position = [1337,1337,1337]
                     lost_track = True
                     
                 if lost_track == False:
