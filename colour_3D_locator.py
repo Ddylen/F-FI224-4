@@ -16,8 +16,9 @@ from pykinect2 import PyKinectRuntime
 import numpy as np
 import cv2
 import ctypes
+from coordinate_transforms import convert_to_arm_coords
 
-def convert_2_world(camera_coords):
+def convert_2_world_local(camera_coords):
     """Convert Camera coordinates to world coordinates"""  
 
     rotation_matrix = np.matrix([[-0.9976,    0.0043,   -0.0690],[   -0.0378,   -0.8696,    0.4923],[   -0.0579,    0.4938,    0.8677]])
@@ -33,7 +34,7 @@ def convert_2_world(camera_coords):
     return world_coords
 
 
-def convert_to_arm_coords(x_input, y_input, z_input, return_depth = False):
+def convert_to_arm_coords_local(x_input, y_input, z_input, return_depth = False):
     """Function to convert an x,y,z value into arm coordinates"""
     
     board_coords = convert_2_world(np.matrix([[x_input], [y_input], [z_input]])) #TODO: confirm that this transformation applies for normalised pixel coordinates
@@ -104,15 +105,15 @@ while True:
                 y_3D = csps1[y*1920 + x].y
                 z_3D = csps1[y*1920 + x].z
 
-                arm_coords = convert_2_world(np.matrix([[z_3D], [y_3D], [x_3D]]))
-                xaxis1 = [0,0,1]
-                xaxis2 = [1,0,1]
+                arm_coords = convert_to_arm_coords(x_3D,y_3D,z_3D)
+                #xaxis1 = [0,0,1]
+                #xaxis2 = [1,0,1]
                 
-                xaxisworld1 = convert_2_world(np.matrix([[0], [0], [1]]))
-                xaxisworld2 = convert_2_world(np.matrix([[1], [0], [1]]))
+                #xaxisworld1 = convert_2_world(np.matrix([[0], [0], [1]]))
+                #xaxisworld2 = convert_2_world(np.matrix([[1], [0], [1]]))
                 
                 #print("pos is ", x_3D, y_3D, z_3D) 
-                print("arm pos is", float(arm_coords[0]), float(arm_coords[1]), float(arm_coords[2]))
+                print("arm pos is", arm_coords)
         ##output = cv2.bilateralFilter(output, 1, 150, 75)
         cv2.imshow('KINECT Video Stream', framefullcolour)
         cv2.setMouseCallback('KINECT Video Stream', click_event)

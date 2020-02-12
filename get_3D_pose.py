@@ -218,9 +218,29 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                 
                 if position == [0,0,0]: #what openpose returns if it cant see
                     lost_track = True
+                
+                
+                #I think this filtering is all in the wrong place...
+                if math.isinf(position[0]) == True: 
+                    arm_coords = [0,0,0.1]
+                    lost_track = True
+                if math.isinf(position[1]) == True:  
+                    arm_coords = [0,0,0.2]
+                    lost_track = True
+                if math.isinf(position[2]) == True:
+                    arm_coords = [0,0,0.3]
+                    lost_track = True
+
+                if math.isnan(position[0]) == True:
+                    arm_coords = [0,0,0.4]
+                    lost_track = True
                     
-                if math.isinf(position[0]) == True or math.isinf(position[1]) == True or math.isinf(position[2]) == True or math.isnan(position[0]) == True or math.isnan(position[1]) == True or math.isnan(position[2]) == True:
-                    position = [1337,1337,1337]
+                if math.isnan(position[1]) == True:
+                    arm_coords = [0,0,0.5]
+                    lost_track = True
+                    
+                if math.isnan(position[2]) == True:
+                    arm_coords = [0,0,0.6]
                     lost_track = True
                     
                 if lost_track == False:
@@ -233,26 +253,40 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                     x_3D = csps1[y*1920 + x].x
                     y_3D = csps1[y*1920 + x].y
                     z_3D = csps1[y*1920 + x].z
+                    
+                   
                     arm_coords  = convert_to_arm_coords(x_3D, y_3D, z_3D)
-                    
-                    try:
-                        
-                        #depth image 2D x and y in pixels, and deoth inage depth of a specific pixel using Colour_to_depth method - useful for displaying joint positions on a 2D image, NOT FOR FINDING 3D JOINT POSITIONS
-                        read_pos = x+y*1920 -1
-                        x_pixels = int(color2depth_points[read_pos].x)
-                        y_pixels = int(color2depth_points[read_pos].y)
-                        
-                    except OverflowError:
-                        
-                        #Say joint is in the corner when you cant see it
-                        x_pixels = 1
-                        y_pixels = 1 
-                    
-                    #Display the 2D joint positions on the depth image if a flag is set (flag makes program run 20x slower)
-                    if show_each_frame == True:
-                        cv2.circle(frame, (x_pixels,y_pixels), 5, (255, 0, 255), -1)
+                    if math.isnan(arm_coords[0]):
+                        arm_coords = [-1,-1,-0.9]
+                        lost_track = True
+                        #raise ImportError("Recieveing nan for 3D position, are you sure that kinect studio is running/ the kinect is connected?") 
 
-                elif lost_track == True:
+                        
+
+                       
+                    #if joint == BODY.RIGHT_ELBOW:
+                       #print(framenum, lost_track)
+                        #print(position)
+                        #print(arm_coords) 
+                    if show_each_frame == True:
+                        try:
+                        
+                            #depth image 2D x and y in pixels, and deoth inage depth of a specific pixel using Colour_to_depth method - useful for displaying joint positions on a 2D image, NOT FOR FINDING 3D JOINT POSITIONS
+                            read_pos = x+y*1920 -1
+                            x_pixels = int(color2depth_points[read_pos].x)
+                            y_pixels = int(color2depth_points[read_pos].y)
+                            
+                        except OverflowError:
+                            
+                            #Say joint is in the corner when you cant see it
+                            x_pixels = 1
+                            y_pixels = 1 
+                    
+                        #Display the 2D joint positions on the depth image if a flag is set (flag makes program run 20x slower)
+                        if show_each_frame == True and lost_track == False:
+                            cv2.circle(frame, (x_pixels,y_pixels), 5, (255, 0, 255), -1)
+
+                if lost_track == True:
                     
                     #Set arm coords to -1 to show that they are in error
                     arm_coords = [-1,-1,-1]
@@ -261,7 +295,7 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                         
                         #draw a big circle if we cant see the joint (will probably end up in the corner of the image)
                         cv2.circle(frame, (0,0), 25, (200, 0, 200), -1)
-                
+
                 #Display annotated depth image if flag is set
                 if show_each_frame == True:
                     cv2.imshow('KINECT Video Stream', frame)
@@ -288,8 +322,10 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
 if __name__ == '__main__': 
 
     #start_time = time.time()
-    body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('1.23.17.49', show_each_frame =  False)
-    print(body_3D_pose)
+    #body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('1.23.17.49', show_each_frame =  False)
+    body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('1.24.21.39', show_each_frame =  False)
+    print(body_3D_pose[BODY.RIGHT_ELBOW.value])
+    """
     #print("Time taken is", time.time()-start_time)
     x_sec= []
     y_sec= []
@@ -307,4 +343,5 @@ if __name__ == '__main__':
     ax = Axes3D(fig)
     ax.scatter(x_sec, y_sec, z_sec)
     plt.show()
+    """
 

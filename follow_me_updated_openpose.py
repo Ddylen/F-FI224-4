@@ -136,4 +136,5 @@ def main(filename):
 if __name__ == '__main__': 
     
     #main('1.23.17.49')
-    main('upperrightdot.31.1.15.46')
+    main('emo2.6.2.15.12')
+    #main('upperrightdot.31.1.15.46')

@@ -372,7 +372,7 @@ def update_lines(frame_num, results_list, lines, time_text):
 old_time = time.time()
 
 #'1.24.21.47'
-file_name = '1.23.17.49'
+file_name = '1.24.21.46'
 BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE = get_arm_3D_coordinates(file_name, confidence_threshold = 0.1)
 #BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE = get_arm_3D_coordinates('1.24.21.39', confidence_threshold = 0)
 

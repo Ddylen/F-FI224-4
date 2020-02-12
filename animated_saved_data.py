@@ -34,9 +34,9 @@ def update_lines(frame_num, RESULTS_LIST, lines, time_text):
             #print(type(line))
             #pass
             line.set_color('r')
-            #x = np.asarray([0,0])
-            #y = np.asarray([0,0])
-            #z = np.asarray([0,0])
+            x = np.asarray([0,0])
+            y = np.asarray([0,0])
+            z = np.asarray([0,0])
         #if i == 47:
             #x = np.asarray([0,0])
             #y = np.asarray([0,0])
@@ -62,6 +62,8 @@ def update_lines(frame_num, RESULTS_LIST, lines, time_text):
 fig = plt.figure()
 ax = p3.Axes3D(fig)
 
+#file_name = '1.24.21.46'
+#file_name = '1.23.17.49'
 file_name = '1.24.22.0'
 readfile = open("bin/filtered_data/" + file_name + ".pickle", "rb")
 loaded_results = pickle.load(readfile)
@@ -71,14 +73,14 @@ loaded_results = pickle.load(readfile)
 lines = [ax.plot(l[0], l[1], l[2])[0] for l in loaded_results[1]]
 
 
-x_upper_limit = 0.75
-x_lower_limit = -0.75
+x_upper_limit = 1
+x_lower_limit = -1
 
-y_upper_limit = 0.75
-y_lower_limit = -0.75
+y_upper_limit = 1
+y_lower_limit = -1
 
-z_upper_limit = 0.5
-z_lower_limit = -1 
+z_upper_limit = 1
+z_lower_limit = -1
 
 # Setting the axes properties
 ax.set_xlim3d([x_lower_limit, x_upper_limit])
@@ -100,10 +102,10 @@ fig.canvas.mpl_connect('button_press_event', onClick)
 
 # Creating the Animation object
 #len(body_3D_pose[0])
-ani = animation.FuncAnimation(fig, update_lines, len(BODY3DPOSE[0]), fargs = [loaded_results, lines, time_text],
+ani = animation.FuncAnimation(fig, update_lines, len(loaded_results), fargs = [loaded_results, lines, time_text],
                                    interval=100, blit=False, repeat = True)
-Writer = animation.writers['ffmpeg']
-writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
-ani.save(file_name +'.mp4', writer=writer)
+#Writer = animation.writers['ffmpeg']
+#writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
+#ani.save(file_name +'.mp4', writer=writer)
 
 plt.show()
