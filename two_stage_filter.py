@@ -1,15 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Feb  3 14:03:28 2020
-
-@author: birl
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Jan 31 15:06:32 2020
-
-@author: birl
+filter based on the last good position the savgol, seems like a good idea but didnt work very well
 """
 
 import numpy as np

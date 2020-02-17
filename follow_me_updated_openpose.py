@@ -1,3 +1,7 @@
+"""
+Code for imitating recorded arm positions in 3D
+"""
+
 from __future__ import print_function
 import sys
 sys.path.insert(1,r'C:\Users\birl\Documents\updated_ur5_controller\Generic_ur5_controller')

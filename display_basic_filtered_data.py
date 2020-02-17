@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-Created on Fri Feb  7 17:10:26 2020
-
-@author: birl
+Code for generating plots of x,y,z, theta 1, theta 2 etc
 """
 
 import numpy as np
@@ -116,6 +113,7 @@ def plot_vertical_line(plot, xval):
 def plot_key_times(plot, ypos, yscale = 0.05):
     lines_list = []
     
+    """
     #'1.24.22.0'
     start_cup_reach = 2
     pour_end = 17
@@ -129,7 +127,7 @@ def plot_key_times(plot, ypos, yscale = 0.05):
     replace_metal_spatula_1= 338
     grab_metal_spatula_2 = 433
     remove_start = 436
-
+    """
     
     """
     #'1.24.21.47'
@@ -161,6 +159,9 @@ def plot_key_times(plot, ypos, yscale = 0.05):
     grab_metal_spatula_2 = 300
     remove_start = 305
     """
+    
+
+
     
     lines_list.append(start_cup_reach)
     lines_list.append(pour_end)

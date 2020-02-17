@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 """
 Program for plotting various trajectories of the hand using wristlist data
 """
@@ -10,8 +10,7 @@ from scipy import signal
 import pickle
 import sys
 import math
-#from get_3D_pose import HAND, BODY, get_arm_3D_coordinates
-"""NEED TO USE OLD TRASNPOSE"""
+from get_3D_pose import HAND, BODY, get_arm_3D_coordinates
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.cm as cm
@@ -29,17 +28,15 @@ def plot_horizontal_line(plot, yval):
 fig = plt.figure()
 plt.close('all')
 
-file_name_1 = 'middle1.24.21.47'
-file_name_2 = 'middle1.24.21.52'
-file_name_3 = 'middle1.24.22.0'
-file_name_4 = 'middle2.7.16.13'
-file_name_5 = 'middle2.7.16.27'
+file_name_1 = 'mockcook.14.2.17.36'
+#file_name_1 = 'middle1.24.21.47'
+#file_name_2 = 'middle1.24.21.52'
+#file_name_3 = 'middle1.24.22.0'
+#file_name_4 = 'middle2.7.16.13'
+#file_name_5 = 'middle2.7.16.27'
 
 plot_list_x_1, plot_list_y_1, plot_list_z_1, theta1_list_filtered_1, theta2_list_filtered_1, timedictvallist_1 = get_smoothed_plotting_data(file_name_1)
-plot_list_x_2, plot_list_y_2, plot_list_z_2, theta1_list_filtered_2, theta2_list_filtered_2, timedictvallist_2 = get_smoothed_plotting_data(file_name_2)
-plot_list_x_3, plot_list_y_3, plot_list_z_3, theta1_list_filtered_3, theta2_list_filtered_3, timedictvallist_3 = get_smoothed_plotting_data(file_name_3)
-plot_list_x_4, plot_list_y_4, plot_list_z_4, theta1_list_filtered_4, theta2_list_filtered_4, timedictvallist_4 = get_smoothed_plotting_data(file_name_4)
-plot_list_x_5, plot_list_y_5, plot_list_z_5, theta1_list_filtered_5, theta2_list_filtered_5, timedictvallist_5 = get_smoothed_plotting_data(file_name_5)
+
 
 
 def plot_thetas(plot_list_x, plot_list_y, plot_list_z, theta1_list_filtered, theta2_list_filtered, timedictvallist):
@@ -60,7 +57,7 @@ def plot_thetas(plot_list_x, plot_list_y, plot_list_z, theta1_list_filtered, the
     
 def plot_linear(plot_list_x, plot_list_y, plot_list_z, theta1_list_filtered, theta2_list_filtered, timedictvallist):
     
-    #plt.plot(plot_list_x,plot_list_y, 'b')
+    plt.plot(plot_list_x,plot_list_y, 'b')
     plt.plot(plot_list_x[timedictvallist[0]*10:timedictvallist[1]*10],plot_list_y[timedictvallist[0]*10:timedictvallist[1]*10], 'r')
     plt.plot(plot_list_x[timedictvallist[2]*10:timedictvallist[3]*10],plot_list_y[timedictvallist[2]*10:timedictvallist[3]*10], 'g')
     plt.plot(plot_list_x[timedictvallist[4]*10:timedictvallist[5]*10],plot_list_y[timedictvallist[4]*10:timedictvallist[5]*10], 'y')
@@ -71,43 +68,13 @@ def plot_linear(plot_list_x, plot_list_y, plot_list_z, theta1_list_filtered, the
 
 
 
-plot_vertical_line(plt, -0.13)
-plot_vertical_line(plt, 0.01)
-plot_vertical_line(plt, 0.185)
-plot_vertical_line(plt, 0.38)
-plot_horizontal_line(plt, -0.39)
-plot_horizontal_line(plt, -0.12)
+plot_vertical_line(plt, -0.157)
+plot_vertical_line(plt, -0.03)
+plot_vertical_line(plt, 0.1)
+plot_vertical_line(plt, 0.22)
+plot_vertical_line(plt, 0.43)
+plot_horizontal_line(plt, 0.14)
+plot_horizontal_line(plt, 0.32)
+plot_horizontal_line(plt, -0.035)
 
 plot_linear(plot_list_x_1, plot_list_y_1, plot_list_z_1, theta1_list_filtered_1, theta2_list_filtered_1, timedictvallist_1)
-fig = plt.figure()
-plot_vertical_line(plt, -0.13)
-plot_vertical_line(plt, 0.01)
-plot_vertical_line(plt, 0.185)
-plot_vertical_line(plt, 0.38)
-plot_horizontal_line(plt, -0.39)
-plot_horizontal_line(plt, -0.12)
-plot_linear(plot_list_x_2, plot_list_y_2, plot_list_z_2, theta1_list_filtered_2, theta2_list_filtered_2, timedictvallist_2)
-fig = plt.figure()
-plot_vertical_line(plt, -0.13)
-plot_vertical_line(plt, 0.01)
-plot_vertical_line(plt, 0.185)
-plot_vertical_line(plt, 0.38)
-plot_horizontal_line(plt, -0.39)
-plot_horizontal_line(plt, -0.12)
-plot_linear(plot_list_x_3, plot_list_y_3, plot_list_z_3, theta1_list_filtered_3, theta2_list_filtered_3, timedictvallist_3)
-fig = plt.figure()
-plot_vertical_line(plt, -0.13)
-plot_vertical_line(plt, 0.01)
-plot_vertical_line(plt, 0.185)
-plot_vertical_line(plt, 0.38)
-plot_horizontal_line(plt, -0.39)
-plot_horizontal_line(plt, -0.12)
-plot_linear(plot_list_x_4, plot_list_y_4, plot_list_z_4, theta1_list_filtered_4, theta2_list_filtered_4, timedictvallist_4)
-fig = plt.figure()
-plot_vertical_line(plt, -0.13)
-plot_vertical_line(plt, 0.01)
-plot_vertical_line(plt, 0.185)
-plot_vertical_line(plt, 0.38)
-plot_horizontal_line(plt, -0.39)
-plot_horizontal_line(plt, -0.12)
-plot_linear(plot_list_x_5, plot_list_y_5, plot_list_z_5, theta1_list_filtered_5, theta2_list_filtered_5, timedictvallist_5)

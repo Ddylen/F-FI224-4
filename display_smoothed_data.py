@@ -1,3 +1,7 @@
+"""
+display smoothed data from a single plot
+"""
+
 import numpy as np
 import time
 from scipy import signal

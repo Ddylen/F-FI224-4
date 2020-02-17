@@ -1,6 +1,4 @@
-"""
-The coorinate transforms from camera to arm coordinates
-"""
+"""Program to convert camera coords to word coords in the new camera position from 14/02/20, hand tuned so not very precise"""
 
 import numpy as np
 import cv2
@@ -21,8 +19,14 @@ def convert_2_world(x,y,z):
     rotation_matrix = np.matrix([[-0.9978,   -0.0316,   -0.0577],[-0.0007,   -0.8722,    0.4891],[-0.0658,    0.4881,    0.8703]])
     
     #Define an x axis rotation to get the x and y axes in the correct directions, because matlab got them wrong for some reason (hand tuned)
-    a = np.radians(-57.6)
+    a = np.radians(-77.85)
     rotx = np.matrix([[1,0,0],[0,   np.cos(a),    -np.sin(a)],[0, np.sin(a), np.cos(a)]])
+    b = np.radians(-1)
+    #b =0
+    roty = np.matrix([[np.cos(b), 0, np.sin(b)],[0,1,0],[-np.sin(b), 0, np.cos(b)]])
+    c = np.radians(-2.9)
+    #c =0
+    rotz = np.matrix([[np.cos(c),-np.sin(c),0],[np.sin(c), np.cos(c),0],[0,0,1]])
     inv_rotation_matrix = rotation_matrix.getI()
     
     #Translation vector from matlab (also to wrong position, included just because)
@@ -34,6 +38,8 @@ def convert_2_world(x,y,z):
     
     #Apply my manual rotation about the x axis to correct the bad y and z axis direction in matlab
     world_coords = world_coords*rotx
+    world_coords = world_coords*roty
+    world_coords = world_coords*rotz
     
     #Define a new vector to get us to where we want the origin to be
     fine_tune = np.matrix([[0.31608206594757293, -1.1510445103398879, 1.8711518386598227]])
@@ -114,7 +120,7 @@ if __name__ == '__main__':
                     #Convert to arm coords
                     arm_coords = convert_to_arm_coords(x_3D, y_3D, z_3D)
     
-                    print("arm pos is", float(arm_coords.item(0)), float(arm_coords.item(1)), float(arm_coords.item(2)))
+                    print("arm pos is", arm_coords[0], arm_coords[1], arm_coords[2])
             
             #Display imagem define what a click means
             cv2.imshow('KINECT Video Stream', framefullcolour)

@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jan 15 11:41:42 2020
-
-@author: birl
-"""
-
-# -*- coding: utf-8 -*-
 """
 Example code for recovering the depth of pixels and displaying it on a screen
 """

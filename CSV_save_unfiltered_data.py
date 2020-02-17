@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Feb 17 18:02:41 2020
+
+@author: birl
+"""
+
 """File to save the JSON data in vector format suitable for animation"""
 
 import numpy as np
@@ -10,6 +17,9 @@ from get_3D_pose import HAND, BODY, get_arm_3D_coordinates
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.cm as cm
+import csv
+
+
 
 
 def savgol_filter(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose, threshold = 0.2):
@@ -166,7 +176,10 @@ def get_plot_list(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose):
     
     print("filter finished")
     
-    results_list = [ [] for i in range(len(body_3D_pose[0]))]
+    rows = len(BODY)+ len(HAND)
+    columns = len(body_3D_pose[0])
+    print(rows, columns)
+    results_list = np.zeros((rows,columns),dtype=object)
     
 
     for frame_num in range(len(body_3D_pose[0])):
@@ -174,83 +187,32 @@ def get_plot_list(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose):
         for joint in HAND:
             
             lost_track = False
-            if joint == HAND.PALM:
-                continue
-            elif joint.value%4 == 1:
-                
+            
+            if hand_pose[joint.value][frame_num][3] == True:
 
+                lost_track = True
+            x1 = hand_pose[joint.value][frame_num][0]
+            y1 = hand_pose[joint.value][frame_num][1]
+            z1 = hand_pose[joint.value][frame_num][2]
+            results_list[joint.value + len(BODY)][frame_num] = [x1,y1,z1, lost_track]
                 
-                x1 = hand_pose[joint.value][frame_num][0]
-                x2 = hand_pose[HAND.PALM.value][frame_num][0]
-                
-                y1 = hand_pose[joint.value][frame_num][1]
-                y2 = hand_pose[HAND.PALM.value][frame_num][1]
-                
-                z1 = hand_pose[joint.value][frame_num][2]
-                z2 = hand_pose[HAND.PALM.value][frame_num][2]
-                
-                if hand_pose[joint.value][frame_num][3] == True or hand_pose[HAND.PALM.value][frame_num][3] == True:
-                    lost_track = True
-
-                results_list[frame_num].append([[x1,x2], [y1,y2], [z1,z2], lost_track])
-                
-            else:
-                if joint ==HAND.THUMB_JOINT_1:
-                    wrist_list.append(hand_pose[joint.value][frame_num])
-                x1 = hand_pose[joint.value][frame_num][0]
-                x2 = hand_pose[joint.value-1][frame_num][0]
-                
-                y1 = hand_pose[joint.value][frame_num][1]
-                y2 = hand_pose[joint.value-1][frame_num][1]
-                
-                z1 = hand_pose[joint.value][frame_num][2]
-                z2 = hand_pose[joint.value-1][frame_num][2]
-                
-                if hand_pose[joint.value][frame_num][3] == True or hand_pose[joint.value-1][frame_num][3] == True:
-                    lost_track = True
-                    
-                results_list[frame_num].append([[x1,x2], [y1,y2], [z1,z2], lost_track])
+           
         
         for joint in BODY:
             lost_track = False
-            if joint.value < 9:
-                if joint == BODY.HEAD or joint == BODY.RIGHT_SHOULDER:
-                    x1 = body_3D_pose[joint.value][frame_num][0]
-                    x2 = body_3D_pose[BODY.CHEST.value][frame_num][0]
-                    
-                    y1 = body_3D_pose[joint.value][frame_num][1]
-                    y2 = body_3D_pose[BODY.CHEST.value][frame_num][1]
-                    
-                    z1 = body_3D_pose[joint.value][frame_num][2]
-                    z2 = body_3D_pose[BODY.CHEST.value][frame_num][2]
-
-                    if body_3D_pose[joint.value][frame_num][3] == True or body_3D_pose[BODY.CHEST.value][frame_num][3] == True:
-                        lost_track = True
-                    if joint != BODY.PELVIS:
-                        results_list[frame_num].append([[x1,x2], [y1,y2], [z1,z2], lost_track])
-                    else:
-                        results_list[frame_num].append([[0,0], [0,0], [0,0], True])
-
-                elif joint ==BODY.RIGHT_ELBOW or joint == BODY.RIGHT_WRIST:
-                    x1 = body_3D_pose[joint.value][frame_num][0]
-                    x2 = body_3D_pose[joint.value -1 ][frame_num][0]
-                    
-                    y1 = body_3D_pose[joint.value][frame_num][1]
-                    y2 = body_3D_pose[joint.value -1 ][frame_num][1]
-                    
-                    z1 = body_3D_pose[joint.value][frame_num][2]
-                    z2 = body_3D_pose[joint.value -1 ][frame_num][2]
-                        
-                    if body_3D_pose[joint.value][frame_num][3] == True:
-
-                        lost_track = True
-                    if body_3D_pose[joint.value -1 ][frame_num][3] == True:
-
-                        lost_track = True
-
-                    results_list[frame_num].append([[x1,x2], [y1,y2], [z1,z2], lost_track])
-                    #if joint ==BODY.RIGHT_WRIST:
-                        #wrist_list.append(body_3D_pose[joint.value][frame_num])
+            
+                
+            x1 = body_3D_pose[joint.value][frame_num][0]
+            y1 = body_3D_pose[joint.value][frame_num][1]
+            z1 = body_3D_pose[joint.value][frame_num][2]
+    
+            if body_3D_pose[joint.value][frame_num][3] == True:
+    
+                lost_track = True
+    
+            results_list[joint.value][frame_num] = [x1,y1,z1, lost_track]
+            if joint ==BODY.RIGHT_WRIST:
+                wrist_list.append(body_3D_pose[joint.value][frame_num])
                     
          
     return results_list, wrist_list
@@ -258,8 +220,8 @@ def get_plot_list(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose):
 
 old_time = time.time()
 
-file_name =  'mockcook.14.2.17.36'
-#file_name = '1.24.21.47'
+#file_name =  'mockcook.14.2.17.36'
+file_name = '1.24.21.47'
 #file_name = "2.7.16.13"
 #file_name = '1.24.22.0'
 #file_name = '1.24.21.39'
@@ -274,21 +236,11 @@ BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE = get_arm_3D_coordinates(file_name, c
 
 results_list, wrist_list = get_plot_list(BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE)
 
-"""
-len_wrist_list = len(wrist_list)
-x = np.arange(len_wrist_list)
-ys = [i+x+(i*x)**2 for i in range(len_wrist_list)]
 
-colors = cm.rainbow(np.linspace(0, 1, len(ys)))
-i = 0
-
-for val,c in zip (wrist_list, colors):
-    #print(val)
-    if i%10 ==0:
-        ax.scatter(val[0], val[1], val[2], color = c)
-    i = i+1
-"""
-    
+for row in results_list:
+    plt.plot(row[0])
+    plt.figure()
+"""  
 datafile = open("bin/filtered_data/" + file_name + ".pickle", "wb")
 pickle.dump(results_list, datafile)
 wristdatafile = open("bin/filtered_data/wrist." + file_name + ".pickle", "wb")
@@ -296,3 +248,10 @@ pickle.dump(wrist_list, wristdatafile)
 
 print("Time taken is", time.time()-old_time)
 
+with open(file_name + '.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(["SN", "Name", "Contribution"])
+    writer.writerow([1, "Linus Torvalds", "Linux Kernel"])
+    writer.writerow([2, "Tim Berners-Lee", "World Wide Web"])
+    writer.writerow([3, "Guido van Rossum", "Python Programming"])
+"""
