@@ -84,6 +84,8 @@ def track_body(folder):
     path = 'bin/JSON/' + folder + '/*.json'
     text_files = glob.glob(path)
     
+    print("Loading data")
+    
     #Load JSONS into a local list
     json_list = []
     for JSON in text_files:
@@ -98,6 +100,8 @@ def track_body(folder):
     hand_tracked_joints_num = 0
     for hand_joint in HAND:
         hand_tracked_joints_num += 1
+        
+    print("Total number of frames is ", len(json_list))
     
     #define list of empty lists to store the joint locations in (in normalised pixel coordinates) 
     left_hand_2D_pose = [ [] for i in range(hand_tracked_joints_num)]
@@ -105,7 +109,10 @@ def track_body(folder):
     body_2D_pose = [ [] for i in range(body_tracked_joints_num)]
     
     #Iteraively store joint positions in appropriate lists, if there is an error append x= -1, y = -1, confidence = -1 to the list
+    frame_num = 0
     for json_dict in json_list:
+        if frame_num%200 == 0:
+             print("Tracking frame", frame_num)
         try:
             for body_joint in BODY:
                 body_2D_pose[body_joint.value].append([json_dict['people'][0].get('pose_keypoints_2d')[3*body_joint.value], json_dict['people'][0].get('pose_keypoints_2d')[3*body_joint.value+1], json_dict['people'][0].get('pose_keypoints_2d')[3*body_joint.value+2]])
@@ -121,13 +128,15 @@ def track_body(folder):
             for hand_joint in HAND:
                 right_hand_2D_pose[hand_joint.value].append([-1,-1,-1])
                 left_hand_2D_pose[hand_joint.value].append([-1,-1,-1])
-        
+        frame_num +=1
     return body_2D_pose, left_hand_2D_pose, right_hand_2D_pose
    
 #REMEBER TO HAVE A KINECT CONNECTED WHEN RUNNING
 def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame = False):
     """Takes saved 2D arm coordinates from track_body and turns them into list of 3D arm coordinates"""
     
+    
+    convert_to_am_coords_bad_count = 0
     print("calculating 3D pose in arm coordinates")
     
     #Load lists of 2D arm coords, check they contain data
@@ -165,7 +174,7 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
     right_hand_3D_pose = [ [] for i in range(hand_tracked_joints_num)]
     body_3D_pose = [ [] for i in range(body_tracked_joints_num)]
     
-    print("Total number of frames is ", len(body_2D_pose[0]))
+    #print("Total number of frames is ", len(body_2D_pose[0]))
     #Iterate over each frame
     for framenum in range(len(body_2D_pose[0])):
         
@@ -212,37 +221,40 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                     
                 else:
                     lost_track = True
+                    #print('a')
                     
                 if position == [-1,-1,-1]:
                     lost_track = True
-                
+                    #print('b')
                 if position == [0,0,0]: #what openpose returns if it cant see
                     lost_track = True
-                
+                    #print('c')
                 
                 #I think this filtering is all in the wrong place...
                 if math.isinf(position[0]) == True: 
                     arm_coords = [0,0,0.1]
                     lost_track = True
+                    #print('d')
                 if math.isinf(position[1]) == True:  
                     arm_coords = [0,0,0.2]
                     lost_track = True
+                    #print('e')
                 if math.isinf(position[2]) == True:
                     arm_coords = [0,0,0.3]
                     lost_track = True
-
+                    #print('f')
                 if math.isnan(position[0]) == True:
                     arm_coords = [0,0,0.4]
                     lost_track = True
-                    
+                    #print('g')
                 if math.isnan(position[1]) == True:
                     arm_coords = [0,0,0.5]
                     lost_track = True
-                    
+                    #print('h')
                 if math.isnan(position[2]) == True:
                     arm_coords = [0,0,0.6]
                     lost_track = True
-                    
+                    #print('i')
                 if lost_track == False:
                     
                     #find x and y in pixel (not normalised pixel) position in the 2D image
@@ -259,11 +271,14 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                     if math.isnan(arm_coords[0]):
                         arm_coords = [-1,-1,-0.9]
                         lost_track = True
+                        #print('j')
+                        convert_to_am_coords_bad_count = convert_to_am_coords_bad_count + 1
                         #raise ImportError("Recieveing nan for 3D position, are you sure that kinect studio is running/ the kinect is connected?") 
 
+                    if convert_to_am_coords_bad_count > 1000:
+                        print("|||\\\___Lots of bad arm coords being returned, are you sure kinect studio is running or a Kinect is connected?___///|||")
                         
-
-                       
+                        convert_to_am_coords_bad_count = 0
                     #if joint == BODY.RIGHT_ELBOW:
                        #print(framenum, lost_track)
                         #print(position)

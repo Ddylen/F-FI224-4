@@ -18,213 +18,18 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.cm as cm
 import csv
-
-
-
-
-def savgol_filter(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose, threshold = 0.2):
-     #print(range(len(body_3D_pose[0])))
-     
-     window_length, polyorder = 11, 2
-     
-     
-     too_big_distance_list = []
-     for hand_pose in right_hand_3D_pose, left_hand_3D_pose:
-         for joint in HAND:
-             #print(list(zip(*hand_pose[joint.value])), window_length, polyorder)
-             #try:
-             x_filtered = signal.savgol_filter(list(zip(*hand_pose[joint.value]))[0], window_length, polyorder)
-             y_filtered = signal.savgol_filter(list(zip(*hand_pose[joint.value]))[1], window_length, polyorder)
-             z_filtered = signal.savgol_filter(list(zip(*hand_pose[joint.value]))[2], window_length, polyorder)
-             lost_track_list = list(zip(*hand_pose[joint.value]))[3]
-             smoothed_list = [list(elem) for elem in list(zip(x_filtered,y_filtered,z_filtered, lost_track_list))]
-             #print(smoothed_list[0])
-             hand_pose[joint.value] = smoothed_list
-             #except np.linalg.LinAlgError:
-                 #print("Linalg error rasied")
-                 #print(joint)
-                 #print(hand_pose[joint.value][0][0])
-                 #print(type(hand_pose[joint.value][0][0]))
-                 #print(math.isnan(hand_pose[joint.value][0][0]))
-                 #print(hand_pose[joint.value])
-
-             
-     for joint in BODY:
-         #try:
-         x_filtered = signal.savgol_filter(list(zip(*body_3D_pose[joint.value]))[0], window_length, polyorder)
-         y_filtered = signal.savgol_filter(list(zip(*body_3D_pose[joint.value]))[1], window_length, polyorder)
-         z_filtered = signal.savgol_filter(list(zip(*body_3D_pose[joint.value]))[2], window_length, polyorder)
-         lost_track_list = list(zip(*body_3D_pose[joint.value]))[3]
-         smoothed_list = [list(elem) for elem in list(zip(x_filtered,y_filtered,z_filtered, lost_track_list))]
-         body_3D_pose[joint.value] = smoothed_list
-         #except np.linalg.LinAlgError:
-             #print("Linalg error rasied")
-             #print(joint)
-             #print(hand_pose[joint.value][0][0])
-             #print(type(hand_pose[joint.value][0][0]))
-             #print(math.isnan(hand_pose[joint.value][0][0]))
-             #print(hand_pose[joint.value])
-        
-    
-     print("Total number of filtered points is", len(too_big_distance_list))
-     return body_3D_pose, left_hand_3D_pose,right_hand_3D_pose
-
-def find_last_good_pose(pose_list, frame_num, original_frame_num):
-    # pose_list is pose[joint.value][frame_num-1]
-
-    if pose_list[frame_num-1][3] == False:
-        returned_frame = frame_num-1
-        found_a_good_point = True
-        last_good_pose = pose_list[returned_frame]
-    else:
-        if frame_num == 0:
-            #print("Found no good past points")
-            last_good_pose = pose_list[original_frame_num]
-            found_a_good_point = False
-            returned_frame = original_frame_num
-            return last_good_pose, returned_frame, found_a_good_point
-        else:
-
-            last_good_pose, returned_frame, found_a_good_point = find_last_good_pose(pose_list, frame_num -1, original_frame_num)
-    return last_good_pose, returned_frame, found_a_good_point
-    
-    
-def filter_out_jumps(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose, threshold = 0.1):
-     count= 0
-     tracked_joint = BODY.PELVIS
-     right_wrist_list = []
-     #print(range(len(body_3D_pose[0])))
-     too_big_distance_list = []
-     for frame_num in range(len(body_3D_pose[0])):
-        if frame_num%100 == 0:
-             print("Filtering frame", frame_num)
-        for hand_pose in right_hand_3D_pose, left_hand_3D_pose:
-            if hand_pose == right_hand_3D_pose:
-                hand = "RIGHT"
-            if hand_pose == left_hand_3D_pose:
-                hand = "LEFT"
-            for joint in HAND:
-                if frame_num != 0:
-                    if hand == "RIGHT":
-                        hand_pose[joint.value][frame_num][0] = hand_pose[joint.value][frame_num][0]
-                        hand_pose[joint.value][frame_num][1] = hand_pose[joint.value][frame_num][1]
-                        hand_pose[joint.value][frame_num][2] = hand_pose[joint.value][frame_num][2]
-                        if  body_3D_pose[BODY.RIGHT_WRIST.value][frame_num][3] ==True:
-                            hand_pose[joint.value][frame_num][3] = True
-                    if hand == "LEFT":
-                        hand_pose[joint.value][frame_num][0] = hand_pose[joint.value][frame_num][0]
-                        hand_pose[joint.value][frame_num][1] = hand_pose[joint.value][frame_num][1]
-                        hand_pose[joint.value][frame_num][2] = hand_pose[joint.value][frame_num][2]
-                        if  body_3D_pose[BODY.LEFT_WRIST.value][frame_num][3] ==True:
-                            hand_pose[joint.value][frame_num][3] = True
-                        
-                    last_good_hand_pose, returned_frame, found_a_good_point = find_last_good_pose(hand_pose[joint.value], frame_num, frame_num)
-                    move_distance = np.sqrt((hand_pose[joint.value][frame_num][0] - last_good_hand_pose[0])**2+(hand_pose[joint.value][frame_num][1]-last_good_hand_pose[1])**2 + (hand_pose[joint.value][frame_num][2]-last_good_hand_pose[2])**2)
-                    if move_distance > threshold:
-                        hand_pose[joint.value][frame_num] = [last_good_hand_pose[0],last_good_hand_pose[1], last_good_hand_pose[2], True]
-                        #hand_pose[joint.value][frame_num] = last_good_hand_pose
-                        #hand_pose[joint.value][frame_num][3] = True
-                        
-                        too_big_distance_list.append(move_distance)
-                        #print("hand fired ", count)
-                        count  +=1
-                    
-
-                    
-    
-        for joint in BODY:
-            if frame_num != 0:
-                #print(body_3D_pose)
-                last_good_body_pose, returned_frame, found_a_good_point = find_last_good_pose(body_3D_pose[joint.value], frame_num, frame_num) 
-                move_distance = np.sqrt((body_3D_pose[joint.value][frame_num][0] - last_good_body_pose[0])**2+(body_3D_pose[joint.value][frame_num][1]-last_good_body_pose[1])**2 + (body_3D_pose[joint.value][frame_num][2]-last_good_body_pose[2])**2)
-                if joint == tracked_joint:
-                    if frame_num ==8 or frame_num == 7 or frame_num == 4  or frame_num == 5:
-                        last_good_body_pose, returned_frame, found_a_good_point = find_last_good_pose(body_3D_pose[joint.value], frame_num, frame_num
-                                                                                                      ) 
-                        move_distance = np.sqrt((body_3D_pose[joint.value][frame_num][0] - last_good_body_pose[0])**2+(body_3D_pose[joint.value][frame_num][1]-last_good_body_pose[1])**2 + (body_3D_pose[joint.value][frame_num][2]-last_good_body_pose[2])**2)
-                    #print(frame_num, last_good_body_pose, move_distance)
-                    #print(body_3D_pose[joint.value][frame_num])
-                if move_distance >= threshold:
-                    #if frame_num < 10 and joint == tracked_joint:
-                        #print("threshold exceeded on", frame_num)
-                    body_3D_pose[joint.value][frame_num] = [last_good_body_pose[0],last_good_body_pose[1], last_good_body_pose[2], True]
-                    
-                    
-                    #body_3D_pose[joint.value][frame_num-1][3] = True
-                    too_big_distance_list.append(move_distance)
-                    #print("body fired ", count)
-                    count +=1 
-                    #print(joint)
-                #if joint == tracked_joint:
-                    #right_wrist_list.append([[frame_num, move_distance, body_3D_pose[joint.value][returned_frame][0],body_3D_pose[joint.value][returned_frame][1], body_3D_pose[joint.value][returned_frame][2] ]])
-                    #print(body_3D_pose[joint.value][frame_num])
-                right_wrist_list.append([[move_distance,frame_num, body_3D_pose[joint.value][returned_frame][3],body_3D_pose[joint.value-1][returned_frame][3]]])
-    
-     #print(sorted(too_big_distance_list))
-     print("Total number of filtered out points is", len(too_big_distance_list))
-     #print(body_3D_pose)
-     return body_3D_pose, left_hand_3D_pose,right_hand_3D_pose
-    
-def get_plot_list(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose):
-    
-    print("filter started")
-    wrist_list = []
-    #remove first fame as its always -1,-1, -1
-    for pose_list in body_3D_pose, left_hand_3D_pose, right_hand_3D_pose:
-        for sublist in pose_list:
-            sublist[0] = sublist[1]
-    
-    print("filter finished")
-    
-    rows = len(BODY)+ len(HAND)
-    columns = len(body_3D_pose[0])
-    print(rows, columns)
-    results_list = np.zeros((rows,columns),dtype=object)
-    
-
-    for frame_num in range(len(body_3D_pose[0])):
-        hand_pose = right_hand_3D_pose
-        for joint in HAND:
-            
-            lost_track = False
-            
-            if hand_pose[joint.value][frame_num][3] == True:
-
-                lost_track = True
-            x1 = hand_pose[joint.value][frame_num][0]
-            y1 = hand_pose[joint.value][frame_num][1]
-            z1 = hand_pose[joint.value][frame_num][2]
-            results_list[joint.value + len(BODY)][frame_num] = [x1,y1,z1, lost_track]
-                
-           
-        
-        for joint in BODY:
-            lost_track = False
-            
-                
-            x1 = body_3D_pose[joint.value][frame_num][0]
-            y1 = body_3D_pose[joint.value][frame_num][1]
-            z1 = body_3D_pose[joint.value][frame_num][2]
-    
-            if body_3D_pose[joint.value][frame_num][3] == True:
-    
-                lost_track = True
-    
-            results_list[joint.value][frame_num] = [x1,y1,z1, lost_track]
-            if joint ==BODY.RIGHT_WRIST:
-                wrist_list.append(body_3D_pose[joint.value][frame_num])
-                    
-         
-    return results_list, wrist_list
+from scipy import signal
 
 
 old_time = time.time()
 
 #file_name =  'mockcook.14.2.17.36'
-file_name = '1.24.21.47'
+#file_name = '1.24.21.47'
 #file_name = "2.7.16.13"
 #file_name = '1.24.22.0'
-#file_name = '1.24.21.39'
+#file_name = "smallpantry1.17.2.16.58"
+#file_name = "smallpantry2heat7.17.2.17.6"
+file_name = "thomastest.17.2.17.28"
 #file_name = '1.24.21.47'
 #file_name = '1.24.21.52'
 #file_name = '1.24.22.0'
@@ -233,25 +38,104 @@ file_name = '1.24.21.47'
 
 
 BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE = get_arm_3D_coordinates(file_name, confidence_threshold = 0)
+"""
+for jointslist in BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE:
+    for jointlist in jointslist:
+        if BODY3DPOSE[1][0] == [-1,-1,-1, True] and BODY3DPOSE[7][0] == [-1,-1,-1, True] and BODY3DPOSE[6][0] == [-1,-1,-1, True] and RIGHTHAND3DPOSE[0][0] == [-1,-1,-1, True]:
+            jointlist = jointlist[1:]
+"""   
+body_raw = BODY3DPOSE
+left_hadn_raw = LEFTHAND3DPOSE
+right_hand_raw = RIGHTHAND3DPOSE
 
-results_list, wrist_list = get_plot_list(BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE)
+i = 0
+
+"""
+for row in BODY3DPOSE:
+    if i%9 ==0:
+        plt.plot(row[0])
+        plt.figure()
+    i = i + 1
+"""
+
+with open(file_name + "filtered" + '.csv', 'w', newline='') as file:
+    filteredwriter = csv.writer(file)
+    for pose_list in BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE:
+        i = 0
+        for joint in pose_list:
+            joint = joint[1:]
+            plot_list_x = [entry[0] for entry in joint]
+            plot_list_y = [entry[1] for entry in joint]
+            plot_list_z = [entry[2] for entry in joint]
+            invalid_list = [entry[3] for entry in joint]
+            plot_list_x_old = plot_list_x *1
+            plot_list_y_old = plot_list_y *1
+            plot_list_z_old = plot_list_z *1
+    
+            window_length, polyorder = 21, 2
+            for frame in range(len(plot_list_x)):
+                limit = 0.2
+                if frame >0 and plot_list_x[frame-1] != -1:
+                    if abs(plot_list_x[frame]-plot_list_x[frame-1]) > limit:
+                        plot_list_x[frame] = plot_list_x[frame-1]
+                    if abs(plot_list_y[frame]-plot_list_y[frame-1]) > limit:
+                        plot_list_y[frame] = plot_list_y[frame-1]
+                    if abs(plot_list_z[frame]-plot_list_z[frame-1]) > limit:
+                        plot_list_z[frame] = plot_list_z[frame-1]
+            if i < 19:
+                ident_string = BODY(i).name
+            elif i>=19 and i<40:
+                ident_string = "Left" + HAND(i).name
+            elif i>=40:
+                ident_string = "Right" + HAND(i).name
+    
+            savgol_plot_list_x = signal.savgol_filter(plot_list_x, window_length, polyorder)
+            savgol_plot_list_y = signal.savgol_filter(plot_list_y, window_length, polyorder)
+            savgol_plot_list_z = signal.savgol_filter(plot_list_z, window_length, polyorder)
+            
+            savgol_plot_list_x = savgol_plot_list_x.tolist()
+            savgol_plot_list_y = savgol_plot_list_y.tolist()
+            savgol_plot_list_z = savgol_plot_list_z.tolist()
+            
+            savgol_plot_list_x.insert(0,ident_string + " X Value")
+            savgol_plot_list_y.insert(0,ident_string+ " Y Value")
+            savgol_plot_list_z.insert(0,ident_string + " Z Value")
+            invalid_list.insert(0, ident_string + " Invalid?")
+            filteredwriter.writerow(savgol_plot_list_x)
+            filteredwriter.writerow(savgol_plot_list_y)
+            filteredwriter.writerow(savgol_plot_list_z)
+            filteredwriter.writerow(invalid_list)
 
 
-for row in results_list:
-    plt.plot(row[0])
-    plt.figure()
-"""  
-datafile = open("bin/filtered_data/" + file_name + ".pickle", "wb")
-pickle.dump(results_list, datafile)
-wristdatafile = open("bin/filtered_data/wrist." + file_name + ".pickle", "wb")
-pickle.dump(wrist_list, wristdatafile)
-
-print("Time taken is", time.time()-old_time)
-
+#results_list, wrist_list = get_plot_list(BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE)
 with open(file_name + '.csv', 'w', newline='') as file:
     writer = csv.writer(file)
-    writer.writerow(["SN", "Name", "Contribution"])
-    writer.writerow([1, "Linus Torvalds", "Linux Kernel"])
-    writer.writerow([2, "Tim Berners-Lee", "World Wide Web"])
-    writer.writerow([3, "Guido van Rossum", "Python Programming"])
-"""
+    i_body = 0
+    i_left = 0
+    i_right = 0
+    for row in BODY3DPOSE:
+            rowcopy = row[1:]
+            rowcopy.insert(0, [BODY(i_body).name + " X Value", BODY(i_body).name +" Y Value", BODY(i_body).name +" Z Value", BODY(i_body).name +" Invaid?"])
+            writer.writerow([entry[0] for entry in rowcopy])
+            writer.writerow([entry[1] for entry in rowcopy])
+            writer.writerow([entry[2] for entry in rowcopy])
+            writer.writerow([entry[3] for entry in rowcopy])
+            i_body +=1 
+            
+    for row in LEFTHAND3DPOSE:
+            rowcopy = row[1:]
+            rowcopy.insert(0, ["Left "+ HAND(i_left).name + " X Value", "Left "+ HAND(i_left).name + " Y Value", "Left "+ HAND(i_left).name + " Z Value", "Left "+ HAND(i_left).name + " Invalid?"])
+            writer.writerow([entry[0] for entry in rowcopy])
+            writer.writerow([entry[1] for entry in rowcopy])
+            writer.writerow([entry[2] for entry in rowcopy])
+            writer.writerow([entry[3] for entry in rowcopy])    
+            i_left +=1 
+            
+    for row in RIGHTHAND3DPOSE:
+            rowcopy = row[1:]
+            rowcopy.insert(0, ["Right "+ HAND(i_right).name+ " X Value", "Right "+ HAND(i_right).name + " Y Value", "Right "+ HAND(i_right).name + " Z Value", "Right "+ HAND(i_right).name + " Invalid?"])
+            writer.writerow([entry[0] for entry in rowcopy])
+            writer.writerow([entry[1] for entry in rowcopy])
+            writer.writerow([entry[2] for entry in rowcopy])
+            writer.writerow([entry[3] for entry in rowcopy])
+            i_right +=1 
