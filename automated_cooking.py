@@ -42,9 +42,10 @@ def grab_item(robo, location, orientation, move_time = 5):
     
 def drop_item(robo, location, orientation, move_time = 5):
     move_height_offset = 0.4
-    robo.close_hand()
+    #robo.close_hand()
     robo.movel([location[0], location[1], location[2]+move_height_offset, orientation[0], orientation[1], orientation[2]], min_time = move_time)
-    robo.movel([location[0], location[1], location[2], orientation[0], orientation[1], orientation[2]], min_time = move_time)
+    robo.movel([location[0], location[1], location[2]+0.03, orientation[0], orientation[1], orientation[2]], min_time = move_time)
+    time.sleep(10)
     robo.open_hand()
     robo.movel([location[0], location[1], location[2]+move_height_offset, orientation[0], orientation[1], orientation[2]], min_time = move_time)
 
@@ -67,7 +68,7 @@ def stir(robo, total_time, time_per_rotation):
     
     #time.sleep(total_time+5)
     #robo.open_hand()
-    robo.translatel_rel([0,0,0.2, 0,0,0], min_time = 3)
+    robo.translatel_rel([0,0,0.4, 0,0,0], min_time = 3)
     #robo.movel([stirrer_location[0],stirrer_location[1],stirrer_location[2]+0.4, 0.98, -2.42, -2.63], min_time = 5)
     #robo.movel([location[0], location[1], location[2]+move_height_offset, orientation[0], orientation[1], orientation[2]], min_time = move_time)
     #robo.movel([location[0], location[1], location[2], orientation[0], orientation[1], orientation[2]], min_time = move_time)
@@ -98,8 +99,9 @@ def circle(total_time, time_per_rotation):
     
     
 stirrer_location = [0.159, -0.53, 0.09]
-ladel_location = [0.025,-0.518, 0.13]
-spatula_location = [-0.22,-0.496, 0.105]
+ladel_location = [0.025,-0.528, 0.12]
+
+spatula_location = [-0.12, -0.528, 0.12]
 whisk_location = [0.16, -0.430, 0.1275]
 
 cup_1_location = [0.312, -0.523, 0.16]
@@ -184,7 +186,8 @@ def main():
     #print(burt.getl())
     """
     
-
+    """
+    MOSTLY WORKS
     #STAGE 1___________________________________________________________________
     get_cups(burt)
     
@@ -199,7 +202,7 @@ def main():
     burt.close_hand()
     burt.movel([0.33, -0.22, 0.5, 1.77, 3.90, -1.61], min_time = 3)
     stir(burt, total_time = 120, time_per_rotation =  1)
-    
+    """
     
     
     
@@ -223,15 +226,22 @@ def main():
     #burt.movel([-0.11, -0.36, 0.28, 1.04, 2.50, 2.50], min_time = 5)
     
     
-    #grab_item(burt, ladel_location, y_orientation)
-    #print("5 seconds sleep")
-    #time.sleep(5)
-    #burt.movej([np.radians(-90), np.radians(-80), np.radians(-123), np.radians(-63), np.radians(90), np.radians(45)])
-    #burt.open_hand()
-    #time.sleep(10)
-    #burt.close_hand()
-    #burt.teach_mode.play("ladel_use1.json")
+    #burt.translatel_rel([0,0,0.2, 0,0,0], min_time = 3)
+    #burt.movej([np.radians(-67), np.radians(-117), np.radians(-89), np.radians(-159), np.radians(30), np.radians(43)], min_time = 5)
     
+    """
+    #POURING
+    grab_item(burt, ladel_location, y_orientation)
+
+    burt.close_hand()
+    #burt.movej([np.radians(-90), np.radians(-80), np.radians(-123), np.radians(-63), np.radians(90), np.radians(45)])
+
+    burt.close_hand()
+    burt.teach_mode.play("ladelvar2.json")
+    """
+    #drop_item(burt, ladel_location, y_orientation)
+    burt.movej([np.radians(-82), np.radians(-110), np.radians(-96), np.radians(-142), np.radians(17), np.radians(35)])
+    grab_item(burt, spatula_location, y_orientation)
     
     #burt.teach_mode.play("ladel_use1.json")
 
