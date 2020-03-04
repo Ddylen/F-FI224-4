@@ -261,11 +261,15 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                     x = int(position[0]*1920)
                     y = int(position[1]*1080)
                     
-                    #Find 3D position of each pixel using Colour_to_camera method
-                    x_3D = csps1[y*1920 + x].x
-                    y_3D = csps1[y*1920 + x].y
-                    z_3D = csps1[y*1920 + x].z
-                    
+                    if type(x) == float:
+                        #Find 3D position of each pixel using Colour_to_camera method
+                        x_3D = csps1[y*1920 + x].x
+                        y_3D = csps1[y*1920 + x].y
+                        z_3D = csps1[y*1920 + x].z
+                    else:
+                        x_3D =-1
+                        y_3D = -1
+                        z_3D = -1
                    
                     arm_coords  = convert_to_arm_coords(x_3D, y_3D, z_3D)
                     if math.isnan(arm_coords[0]):

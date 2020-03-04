@@ -130,6 +130,23 @@ dict2_7_16_27 = {'start_cup_reach': 6,
 #grab_metal_spatula_1 = 284 (abandoned attempt)
 #flip_start = 287 (abandoned attempt)
     
+
+
+dict_mar = {'start_cup_reach': 5, 
+ 'pour_end' : 20,
+ 'grab_spatula' : 22,
+'replace_spatula' : 43,
+'grab_ladel' : 43,
+'replace_ladel' : 62,
+'grab_metal_spatula_1' : 398,
+'flip_start' : 401,
+'flip_finish' : 476,
+'replace_metal_spatula_1': 479,
+'grab_metal_spatula_2' : 572,
+'remove_start' : 573}
+
+
+
 #Define limits of the values well plot in 3D
 
 x_upper_limit = 1
@@ -158,13 +175,13 @@ old_time = time.time()
 
 #file_name =  '1.23.17.49'
 #file_name = '1.24.21.47'
-#file_name = '1.24.22.0'
+file_name = '1.24.22.0'
 #file_name = '1.24.21.39'
 #file_name = '1.24.21.52'
 #file_name = '2.7.16.13'
-file_name = '2.7.16.27'
+#file_name = '2.7.16.27'
 
-TIMEDICT = dict2_7_16_27
+TIMEDICT = dict1_24_22_0
 
 wristdatafile = open("bin/filtered_data/wrist." + file_name + ".pickle", "rb")
 wrist_list = pickle.load(wristdatafile)
@@ -221,13 +238,13 @@ for frame in range(len(plot_list_x)):
 
 
 #Apply savgol filter for smoothing of x,y,z values
-window_length, polyorder = 101, 2
+window_length, polyorder = 21, 2
 plot_list_x = signal.savgol_filter(plot_list_x, window_length, polyorder)
 plot_list_y = signal.savgol_filter(plot_list_y, window_length, polyorder)
 plot_list_z = signal.savgol_filter(plot_list_z, window_length, polyorder)
 
 #Plot x vs y with colour for the important sections
-plt.plot(plot_list_x,plot_list_y)
+#plt.plot(plot_list_x,plot_list_y)
 plt.title("x-y map")
 plt.xlim(x_lower_limit,x_upper_limit)
 plt.ylim(y_lower_limit,y_upper_limit)
