@@ -19,12 +19,21 @@ def convert_2_world(x,y,z):
     rotation_matrix = np.matrix([[-0.9978,   -0.0316,   -0.0577],[-0.0007,   -0.8722,    0.4891],[-0.0658,    0.4881,    0.8703]])
     
     #Define an x axis rotation to get the x and y axes in the correct directions, because matlab got them wrong for some reason (hand tuned)
-    a = np.radians(-77.85)
+    a = np.radians(-77.85-0.2)
     rotx = np.matrix([[1,0,0],[0,   np.cos(a),    -np.sin(a)],[0, np.sin(a), np.cos(a)]])
     b = np.radians(-1)
     #b =0
     roty = np.matrix([[np.cos(b), 0, np.sin(b)],[0,1,0],[-np.sin(b), 0, np.cos(b)]])
-    c = np.radians(-2.9)
+    c = np.radians(-3.9)
+    
+    """
+    a = np.radians(-77.85-0.3)
+    rotx = np.matrix([[1,0,0],[0,   np.cos(a),    -np.sin(a)],[0, np.sin(a), np.cos(a)]])
+    b = np.radians(-1)
+    #b =0
+    roty = np.matrix([[np.cos(b), 0, np.sin(b)],[0,1,0],[-np.sin(b), 0, np.cos(b)]])
+    c = np.radians(-3.9)
+    """
     #c =0
     rotz = np.matrix([[np.cos(c),-np.sin(c),0],[np.sin(c), np.cos(c),0],[0,0,1]])
     inv_rotation_matrix = rotation_matrix.getI()

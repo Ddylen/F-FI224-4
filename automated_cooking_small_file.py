@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Mar  5 12:23:15 2020
+Created on Mon Mar  9 18:02:58 2020
 
 @author: birl
 """
@@ -19,10 +19,10 @@ import kg_robot as kgr
 import waypoints as wp
 
 stirrer_location = [0.159, -0.53, 0.09]
-ladel_location = [0.040,-0.527, 0.12]
+ladel_location = [0.04,-0.562, 0.113]
 
-spatula_location = [-0.103, -0.507, 0.112]
-whisk_location = [0.17, -0.425, 0.132]
+spatula_location = [-0.103, -0.507, 0.116]
+whisk_location = [0.17, -0.425, 0.127]
 
 cup_1_location = [0.340, -0.504, 0.156]
 cup_2_location = [0.215, -0.504, 0.156]
@@ -48,7 +48,9 @@ def grab_stirrer(robo):
 
 def grab_item(robo, location, orientation, move_time = 5):
     move_height_offset = 0.1
+
     robo.open_hand()
+
     time.sleep(0.2)
     robo.movel([location[0], location[1], location[2]+move_height_offset, orientation[0], orientation[1], orientation[2]], min_time = 2)
     robo.movel([location[0], location[1], location[2], orientation[0], orientation[1], orientation[2]], min_time = 5)
@@ -64,9 +66,12 @@ def grab_item(robo, location, orientation, move_time = 5):
 
     #robo.close_hand()
     
-def grab_big_item(robo, location, orientation, move_time = 5, angle = 85):
+def grab_big_item(robo, location, orientation, move_time = 5, angle = 85, old = False):
     move_height_offset = 0.1
-    robo.open_hand()
+    if old == False:
+        robo.open_hand()
+    else:
+        robo.open_hand_old()
     time.sleep(0.2)
     robo.movel([location[0], location[1], location[2]+move_height_offset, orientation[0], orientation[1], orientation[2]], min_time = 2)
     robo.movel([location[0], location[1], location[2], orientation[0], orientation[1], orientation[2]], min_time = 5)
@@ -78,6 +83,12 @@ def grab_big_item(robo, location, orientation, move_time = 5, angle = 85):
         robo.close_hand_85()
     if angle == 90:
         robo.close_hand_90()
+    if angle == 95:
+        robo.close_hand_95()
+    if angle == 100:
+        robo.close_hand_100()
+    if angle == 110:
+        robo.close_hand_110()
     if angle == 80:
         robo.fat_close_hand()
     robo.movel([location[0], location[1], location[2]+move_height_offset, orientation[0], orientation[1], orientation[2]], min_time = 5)
@@ -146,7 +157,7 @@ def circle(total_time, time_per_rotation):
     #radius = 0.05
     #z_val = 0.302
     radius = 0.065
-    z_val = 0.245
+    z_val = 0.247
     num_rotations = total_time/time_per_rotation
     num_points = int(num_rotations*time_per_rotation*100)
     points = np.linspace(0,num_rotations*math.pi*2,num_points)
@@ -205,103 +216,13 @@ def main():
 
     burt = 0
 
-    burt = kgr.kg_robot(port=30010,db_host="169.254.150.100", ee_port="COM3")
-
+    #burt = kgr.kg_robot(port=30010,db_host="169.254.150.100", ee_port="COM3")
+    burt = kgr.kg_robot(port=30010,db_host="169.254.150.100")
     print("----------------Hi Burt!-----------------\r\n\r\n")
-    #startpos is ([-0.11, -0.36, 0.28, 1.04, 2.50, 2.50])
-    
-    #burt.open_hand()
-    #time.sleep(5)
-    #burt.open_hand()
-    """
-    #STIR EXAMPLE
-    
-    #burt.movel([0.33, -0.4, 0.3, 1.72,-0.82,-1.76], min_time = 3)
-    #stir(burt)
-    """
-    """
-    #HAND OPEN EXAMPLE
-    i = 0
-    burt.open_hand()
-    time.sleep(1)
-    burt.close_hand()
-    time.sleep(1)
-    i = i+1
-    print("cycle", i)
-    """
-    """
-    
-    burt.open_hand()
-    time.sleep(1)
-    burt.close_hand()
-    time.sleep(1)
-    i = i+1
-    print("cycle", i)   
-    
-    burt.open_hand()
-    time.sleep(1)
-    burt.close_hand()
-    time.sleep(1)
-    i = i+1
-    print("cycle", i)
-    """
-    """
-    #POUR EXAMPLE
-    
-    #print(burt.getl())
-    burt.movel([-0.11, -0.36, 0.4, 1.04, 2.50, 2.50], min_time = 3)
-    print(burt.getl())
-    #burt.set_tcp([0.0,0.07,0.06,0,0,-np.radians(225)])
-    #burt.set_tcp([0.0,0.08,0.075,0,0,-np.radians(225)])
-    burt.set_tcp([0.0565,-0.0565,0.075,0,0,-np.radians(225)])
-    #time.sleep(2)
-    print(burt.getl())
-    #burt.movel([-0.159193 , -0.297381, 0.350267, 0.00330878, 2.22059+np.radians(180), 2.21666], min_time = 5)
-    
-    #MOVEL STILL WORKS NORMALLY
-    
-    #burt.movel([-0.20845, -0.297476, 0.187574, -1.21311 , -1.20947+ np.radians(90), -1.21248], min_time = 5)
-    #burt.movel([0.26, -0.1, 0.4,0,0,0], min_time = 5)
-    
-    burt.movel_tool([0,0,0,0,0, np.radians(90)], min_time = 5)
-    #burt.movel_tool([0,0,0,-np.radians(90),0,0], min_time = 5)
-    #burt.movel_tool([0,0,0,np.radians(90),0,0], min_time = 5)
-    #print(burt.getl())
-    """
-    """
-    grab_big_item(burt, whisk_location, y_orientation)
-    #burt.close_hand()
-    burt.translatel_rel([0,0,0.1, 0,0,0], min_time = 3)
-    print("start drop")
-    drop_item(burt, whisk_location, y_orientation)
-    """
-    #burt.home(pose = wp.burt_homej, wait=False)
-    
-    #burt.open_hand()
-    #drop_item(burt, ladel_location, y_orientation)
 
-    
-    """
-    burt.movej([np.radians(-67), np.radians(-112), np.radians(-87), np.radians(-161), np.radians(26), np.radians(43)], min_time = 3)
-    burt.open_hand()
-    grab_big_item(burt, ladel_location, y_orientation)
+
 
     """
-    """
-    for i in range(5):
-        burt.movej([np.radians(-67), np.radians(-112), np.radians(-87), np.radians(-161), np.radians(26), np.radians(43)], min_time = 3)
-        burt.open_hand()
-        grab_big_item(burt, ladel_location, y_orientation, angle = 85)
-        drop_item(burt, ladel_location, y_orientation)
-    """
-    burt.movej([np.radians(-67), np.radians(-112), np.radians(-87), np.radians(-161), np.radians(26), np.radians(43)], min_time = 3)
-    burt.open_hand()
-    grab_big_item(burt, ladel_location, y_orientation, angle = 85)
-    burt.teach_mode.record("scoop2") #works
-    time.sleep(5)
-    burt.teach_mode.record("pour2") #works
-    """
-    #MOSTLY WORKS
     #STAGE 1___________________________________________________________________
     burt.open_hand()
     burt.home(pose = wp.burt_homej, wait=False)
@@ -311,162 +232,44 @@ def main():
     #STAGE 2___________________________________________________________________
     whisk_actions(burt)
 
-
+ 
     #STAGE 3___________________________________________________________________
     burt.movej([np.radians(-67), np.radians(-112), np.radians(-87), np.radians(-161), np.radians(26), np.radians(43)], min_time = 3)
     burt.open_hand()
-    grab_big_item(burt, ladel_location, y_orientation, angle = 90)
+    grab_big_item(burt, ladel_location, y_orientation, angle = 80, old = True)
+    
+    burt.teach_mode.play("scoop93201.json")
 
-    burt.close_hand()
-    #burt.movej([np.radians(-90), np.radians(-80), np.radians(-123), np.radians(-63), np.radians(90), np.radians(45)])
-
-    burt.teach_mode.play("scoop1.json") #works but then i moved the spatula location
-
-    burt.teach_mode.play("pour1.json") #works
+    burt.teach_mode.play("pour93201.json") #works
     drop_item(burt, ladel_location, y_orientation)
 
     time.sleep(180)
+    """   
     #STAGE 4___________________________________________________________________
-    burt.movej([np.radians(-80), np.radians(-110), np.radians(-89), np.radians(-170), np.radians(14), np.radians(49)], min_time = 4)
-    grab_big_item(burt, spatula_location, spatula_orientation, angle = 90)
-    burt.teach_mode.play("flip1.json")    #picks up pancake
-    burt.fat_close_hand()
-    #burt.teach_mode.play("flip2.json")   #flips pancakes, but bot to a reliabel location
-    burt.teach_mode.play("flip3.json") 
-
-    
-
-    time.sleep(180)
-    #STAGE 5___________________________________________________________________
-    #burt.fat_close_hand()
-    burt.movej([np.radians(-15), np.radians(-93), np.radians(-111), np.radians(-95), np.radians(81), np.radians(116)], min_time = 3)
-    #burt.teach_mode.play("remove.json")   #removes pancakes
-    burt.teach_mode.play("remove2.json")   #removes pancakes
-    burt.movej([np.radians(-54), np.radians(-113), np.radians(-69), np.radians(-111), np.radians(93), np.radians(69)], min_time = 4)
-    drop_item(burt, drop_spatula_location, drop_spatula_orientation)
     """
-    """
-    i = 0
-    burt.open_hand()
-    time.sleep(1)
-    burt.fat_close_hand()
-    time.sleep(1)
-    i = i+1
-    print("cycle", i)
-
-    burt.open_hand()
-    time.sleep(1)
-    burt.fat_close_hand()
-    time.sleep(1)
-    i = i+1
-    print("cycle", i)   
-    
-    burt.open_hand()
-    time.sleep(1)
-    burt.fat_close_hand()
-    time.sleep(1)
-    i = i+1
-    print("cycle", i)
-    
     burt.movej([np.radians(-80), np.radians(-110), np.radians(-89), np.radians(-170), np.radians(14), np.radians(49)], min_time = 4)
     grab_big_item(burt, spatula_location, spatula_orientation)
-    burt.translatel_rel([0,0,0.2, 0,0,0], min_time = 5)
-    
-    
-    burt.movel([0.376563, -0.240263, 0.268907, -0.972767, -2.64528, 0.314281], min_time = 6)
+    burt.teach_mode.play("pick93201.json")    #picks up pancake
     """
-    #burt.movel([0.376563, -0.240263, 0.268907, -0.972767, -2.64528, 0.314281], min_time = 6)
-    #burt.teach_mode.record("remove2")   #flips pancake
-    
-    #burt.translatel_rel([0,0,0.1, 0,0,0], min_time = 3)
-
-
-    #burt.movej([np.radians(-90), np.radians(-90), np.radians(-100), np.radians(-73), np.radians(90), np.radians(45)], min_time = 3)
-    
-    
-    
-    #burt.open_hand()
-    #time.sleep(10)
-    #burt.close_hand()
-
-    #Get Other Equiptment
-    
-
-    
-    
-    #burt.movel([-0.11, -0.36, 0.28, 1.04, 2.50, 2.50], min_time = 5)
-    #grab_item(burt, ladel_location, y_orientation)
-    #burt.movel([-0.11, -0.36, 0.28, 1.04, 2.50, 2.50], min_time = 5)
-    #grab_item(burt, spatula_location, y_orientation_reverse)
-    #burt.movel([-0.11, -0.36, 0.28, 1.04, 2.50, 2.50], min_time = 5)
-    
-    
-    #burt.translatel_rel([0,0,0.2, 0,0,0], min_time = 3)
-    #burt.movej([np.radians(-67), np.radians(-117), np.radians(-89), np.radians(-159), np.radians(30), np.radians(43)], min_time = 5)
-    
-
-
     """
-    burt.translatel_rel([0,0,0.05, 0,0,0], min_time = 0.6)
-    burt.translatel_rel([0,0,-0.05, 0,0,0], min_time = 0.6)
-    burt.translatel_rel([0,0,0.05, 0,0,0], min_time = 0.6)
-    burt.translatel_rel([0,0,-0.05, 0,0,0], min_time = 0.6)
-    burt.translatel_rel([0,0,0.05, 0,0,0], min_time = 0.6)
-    burt.translatel_rel([0,0,-0.05, 0,0,0], min_time = 0.6)
+    burt.movej([np.radians(-20), np.radians(-111), np.radians(-93), np.radians(-87), np.radians(83), np.radians(99)], min_time = 4)
+    burt.teach_mode.play("flip93202.json")    #picks up pancake
     
-    burt.movej([np.radians(-23), np.radians(-99), np.radians(-73), np.radians(-231), np.radians(-36), np.radians(135)])
-    burt.movej([np.radians(-88), np.radians(-99), np.radians(-73), np.radians(-227), np.radians(-78), np.radians(135)])
+    
+    #burt.movej([np.radians(-54), np.radians(-113), np.radians(-69), np.radians(-111), np.radians(93), np.radians(69)], min_time = 8)
+    
+    time.sleep(180)
+    #STAGE 5___________________________________________________________________
     """
+    burt.movej([np.radians(-16), np.radians(-106), np.radians(-96), np.radians(-85), np.radians(86), np.radians(113)], min_time = 4)
+    burt.teach_mode.play("pickup93202.json")    #picks up pancake
+ 
+    burt.movej([np.radians(-54), np.radians(-113), np.radians(-69), np.radians(-111), np.radians(93), np.radians(69)], min_time = 4)
+    drop_item(burt, drop_spatula_location, drop_spatula_orientation)
  
 
 
 
-    #drop_item(burt, ladel_location, y_orientation)
-    #burt.open_hand()
-    #burt.movej([np.radians(-82), np.radians(-110), np.radians(-96), np.radians(-142), np.radians(17), np.radians(35)])
-    #burt.open_hand()
-    #time.sleep(2)
-    #burt.close_hand()
-    #time.sleep(2)
-    #burt.open_hand()
-    #time.sleep(2)
-    #burt.close_hand()
-    
-    """
-    burt.movej([np.radians(-80), np.radians(-110), np.radians(-89), np.radians(-170), np.radians(14), np.radians(49)], min_time = 4)
-    grab_big_item(burt, spatula_location, spatula_orientation)
-    drop_item(burt, drop_spatula_location, drop_spatula_orientation)
-    """
-    """
-    burt.movej([np.radians(-80), np.radians(-110), np.radians(-89), np.radians(-170), np.radians(14), np.radians(49)], min_time = 4)
-    grab_big_item(burt, spatula_location, spatula_orientation)
-    burt.teach_mode.play("flip1.json")    #picks up pancake
-    """
-    #burt.fat_close_hand()
-    #burt.movej([np.radians(-15), np.radians(-93), np.radians(-111), np.radians(-95), np.radians(81), np.radians(116)], min_time = 3)
-    """
-    burt.fat_close_hand()
-    burt.teach_mode.play("flip2.json")   #flips pancakes
-    """
-    #burt.fat_close_hand()
-    #burt.movej([np.radians(-15), np.radians(-93), np.radians(-111), np.radians(-95), np.radians(81), np.radians(116)], min_time = 3)
-    # burt.teach_mode.play("remove.json")   #removes pancakes
-    #burt.movej([np.radians(-54), np.radians(-113), np.radians(-69), np.radians(-111), np.radians(93), np.radians(69)], min_time = 4)
-    #drop_item(burt, spatula_location, spatula_orientation)
-    
-    
-    
-    
-    
-    #burt.teach_mode.play("flip.json")
-    #burt.teach_mode.play("ladel_use1.json")
-    #burt.open_hand()    
-    #grab_item(burt, ladel_location, y_orientation)
-    #burt.close_hand()
-    #burt.teach_mode.record("scoop .json")
-    
-    #drop_item(burt, spatula_location, spatula_orientation)
-    
     burt.ee.reset_output_buffer()
     burt.ee.close()
     print("reset")

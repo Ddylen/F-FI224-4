@@ -308,8 +308,10 @@ old_time = time.time()
 
 #file_name =  '1.23.17.49'
 #file_name = '1.24.21.46'
-file_name = '1.24.22.0'
+#file_name = '1.24.22.0'
 #file_name = '1.24.21.39'
+file_name = "mar.3.3.15.38"
+
 BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE = get_arm_3D_coordinates(file_name, confidence_threshold = 0.05)
 #BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE = get_arm_3D_coordinates('1.24.21.39', confidence_threshold = 0)
 

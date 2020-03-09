@@ -256,20 +256,30 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                     lost_track = True
                     #print('i')
                 if lost_track == False:
-                    
+
+                    if position[0]>1 :
+                        position[0] = 1-1/1920         
+ 
+                    if position[0]<0 :
+                        position[0] = 0    
+                        
+                    if position[1]>1 :
+                        position[1] = 1-1/1920         
+ 
+                    if position[1]<0 :
+                        position[1] = 0  
+
                     #find x and y in pixel (not normalised pixel) position in the 2D image
                     x = int(position[0]*1920)
                     y = int(position[1]*1080)
                     
-                    if type(x) == float:
-                        #Find 3D position of each pixel using Colour_to_camera method
-                        x_3D = csps1[y*1920 + x].x
-                        y_3D = csps1[y*1920 + x].y
-                        z_3D = csps1[y*1920 + x].z
-                    else:
-                        x_3D =-1
-                        y_3D = -1
-                        z_3D = -1
+  
+
+                    #Find 3D position of each pixel using Colour_to_camera method
+                    x_3D = csps1[y*1920 + x].x
+                    y_3D = csps1[y*1920 + x].y
+                    z_3D = csps1[y*1920 + x].z
+
                    
                     arm_coords  = convert_to_arm_coords(x_3D, y_3D, z_3D)
                     if math.isnan(arm_coords[0]):
@@ -342,7 +352,8 @@ if __name__ == '__main__':
 
     #start_time = time.time()
     #body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('1.23.17.49', show_each_frame =  False)
-    body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('1.24.21.39', show_each_frame =  False)
+    #body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('1.24.21.39', show_each_frame =  False)
+    body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('feb3.3.3.15.30', show_each_frame =  False)
     print(body_3D_pose[BODY.RIGHT_ELBOW.value])
     """
     #print("Time taken is", time.time()-start_time)

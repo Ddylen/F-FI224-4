@@ -132,7 +132,7 @@ dict2_7_16_27 = {'start_cup_reach': 6,
     
 
 
-dict_mar = {'start_cup_reach': 5, 
+dict3_3_15_38 = {'start_cup_reach': 5, 
  'pour_end' : 20,
  'grab_spatula' : 22,
 'replace_spatula' : 43,
@@ -170,18 +170,18 @@ z_lower_limit = -3
 """
 #Track start time
 old_time = time.time()
-
+#
 #LOAD SAVED DATA
 
 #file_name =  '1.23.17.49'
 #file_name = '1.24.21.47'
-file_name = '1.24.22.0'
+#file_name = '1.24.22.0'
 #file_name = '1.24.21.39'
 #file_name = '1.24.21.52'
 #file_name = '2.7.16.13'
 #file_name = '2.7.16.27'
-
-TIMEDICT = dict1_24_22_0
+file_name = "mar.3.3.15.38"
+TIMEDICT = dict3_3_15_38
 
 wristdatafile = open("bin/filtered_data/wrist." + file_name + ".pickle", "rb")
 wrist_list = pickle.load(wristdatafile)
