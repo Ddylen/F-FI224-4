@@ -137,11 +137,13 @@ if __name__ == "__main__":
     #file_name = '1.24.22.0'
     #file_name = "smallpantry1.17.2.16.58"
     #file_name = "smallpantry2heat7.17.2.17.6"
-    file_name = "march10.10.3.15.1"
+    #file_name = "march10.10.3.15.1"
+    #file_name = "firstcomparison.11.3.14.18"
+    file_name = "trial1dylan.12.3.16.31"
     #file_name = '1.24.21.47'
     #file_name = '1.24.21.52'
     #file_name = '1.24.22.0'
     #file_name = '2.7.16.13'
     #file_name = '2.7.16.27'
-    save_CSV("dylannewsetup.10.3.17.5")
+    save_CSV(file_name)
     

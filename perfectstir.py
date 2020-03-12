@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Thu Mar 12 19:29:42 2020
+
+@author: birl
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Mon Mar  9 18:02:58 2020
 
 @author: birl
@@ -99,7 +106,7 @@ def stir(robo, total_time, time_per_rotation):
     
     for val in circle_points:
 
-        robo.servoj([val[0], val[1], val[2],1.77, 3.90, -1.61], lookahead_time = 0.2, control_time = 0.01, gain = 100)
+        robo.servoj([val[0], val[1], val[2],1.474, 4.212, -1.380], lookahead_time = 0.2, control_time = 0.01, gain = 100)
     
 
     robo.translatel_rel([0,0,0.05, 0,0,0], min_time = 1)
@@ -107,10 +114,10 @@ def stir(robo, total_time, time_per_rotation):
 
 def circle(total_time, time_per_rotation):
 
-    centre= [0.355, -0.175]
+    centre= [0.355, -0.215]
 
-    radius = 0.08
-    z_val = 0.242
+    radius = 0.09
+    z_val = 0.245
     num_rotations = total_time/time_per_rotation
     num_points = int(num_rotations*time_per_rotation*100)
     points = np.linspace(0,num_rotations*math.pi*2,num_points)
@@ -176,7 +183,7 @@ def main(stir_time, batter_sit_time, cook1_time, cook2_time, use_gripper = True)
     #scoop the batter, leaving the ladel over the bowl
     #burt.teach_mode.play_fast("scoop93201.json", speedup = 3)
     """
-    for i in range(10):
+    for i in range(1):
         burt.movej([np.radians(-45), np.radians(-105), np.radians(-103), np.radians(-150), np.radians(45), np.radians(45)])
         grab_item(burt, whisk_location, y_orientation, angle = 85)
         
