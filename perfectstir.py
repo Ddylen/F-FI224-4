@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Mar 12 19:29:42 2020
+To Do:
+•	Still from cooking process with clean setup
+o	Add x/y/z coordinates to said still
+•	Recording from Kinect of robot cooking
+•	Improve my process flowchart
+•	Combine my process flowchart with the recipe flowchart so that they are side by side
+•	Write up report
 
-@author: birl
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Mar  9 18:02:58 2020
-
-@author: birl
 """
 
 """
@@ -116,7 +114,7 @@ def circle(total_time, time_per_rotation):
 
     centre= [0.355, -0.215]
 
-    radius = 0.09
+    radius = 0.095
     z_val = 0.245
     num_rotations = total_time/time_per_rotation
     num_points = int(num_rotations*time_per_rotation*100)
@@ -164,13 +162,18 @@ def main(stir_time, batter_sit_time, cook1_time, cook2_time, use_gripper = True)
         drop_item(burt, ladel_location, y_orientation)
         time.sleep(15)
     """
+    """
+    burt.movej([np.radians(-80), np.radians(-110), np.radians(-89), np.radians(-170), np.radians(14), np.radians(49)], min_time = 2)
+    grab_item(burt, spatula_location, spatula_orientation)
     
-    
-    stage1 = False
-    stage2 = False
-    stage3 = False
-    stage4 = False
-    stage5 = False
+    #Pick up the pancake and hold it above the pan
+    burt.teach_mode.record("pick163201.json") 
+    """
+    stage1 = True
+    stage2 = True
+    stage3 = True
+    stage4 = True
+    stage5 = True
     
     """
     for i in range(10):
@@ -182,6 +185,7 @@ def main(stir_time, batter_sit_time, cook1_time, cook2_time, use_gripper = True)
     
     #scoop the batter, leaving the ladel over the bowl
     #burt.teach_mode.play_fast("scoop93201.json", speedup = 3)
+    """
     """
     for i in range(1):
         burt.movej([np.radians(-45), np.radians(-105), np.radians(-103), np.radians(-150), np.radians(45), np.radians(45)])
@@ -214,6 +218,7 @@ def main(stir_time, batter_sit_time, cook1_time, cook2_time, use_gripper = True)
     
     #scoop the batter, leaving the ladel over the bowl
     #burt.teach_mode.play_fast("scoop93201.json", speedup = 3)
+    """
     """
     #pour the batter into the pan
     burt.teach_mode.play("pour93201.json")
@@ -320,7 +325,7 @@ def main(stir_time, batter_sit_time, cook1_time, cook2_time, use_gripper = True)
         
         #sleep so that the pancake cooks for the appropriate amount of time
         cook1_time_in_pour = 52
-        cook1_time_in_pick = 40
+        cook1_time_in_pick = 30
         print(time.time()- start_time, ": Cooking Pancakes Side 1")
         sleeptime2 = max(cook1_time-cook1_time_in_pour-cook1_time_in_pick,0)
         print("sleep for", sleeptime2)
@@ -334,14 +339,15 @@ def main(stir_time, batter_sit_time, cook1_time, cook2_time, use_gripper = True)
         grab_item(burt, spatula_location, spatula_orientation)
         
         #Pick up the pancake and hold it above the pan
-        burt.teach_mode.play("pick93201.json") 
+        #burt.teach_mode.play("pick93201.json") 
+        burt.teach_mode.play("pick163201.json")
         
         #Move to a reference position slowly (nominally where the last action ends, then flip the pancake)
         burt.movej([np.radians(-20), np.radians(-111), np.radians(-93), np.radians(-87), np.radians(83), np.radians(99)], min_time = 2)
         burt.teach_mode.play("flip93202.json")    
         
         #Sleep so that the other side of the pancake cooks for an appropriate amount of time
-        cook2_time_in_flip =20
+        cook2_time_in_flip =13
         cook2_time_in_pickup = 0
         print(time.time()- start_time, ": Cooking Pancakes Side 2")
         sleeptime3= max(cook2_time-cook2_time_in_flip-cook2_time_in_pickup,0)
@@ -358,8 +364,8 @@ def main(stir_time, batter_sit_time, cook1_time, cook2_time, use_gripper = True)
         burt.teach_mode.play("pickup93202.json") 
         
         #Move spatula back to the appropriate location and release it
-        burt.movej([np.radians(-54), np.radians(-113), np.radians(-69), np.radians(-111), np.radians(93), np.radians(69)], min_time = 4)
-        drop_item(burt, drop_spatula_location, drop_spatula_orientation)
+        #burt.movej([np.radians(-54), np.radians(-113), np.radians(-69), np.radians(-111), np.radians(93), np.radians(69)], min_time = 4)
+        #drop_item(burt, drop_spatula_location, drop_spatula_orientation)
      
     
         print(time.time()- start_time, ": Pancakes Ready")
@@ -373,4 +379,14 @@ def main(stir_time, batter_sit_time, cook1_time, cook2_time, use_gripper = True)
 
 
 if __name__ == '__main__': 
-    main(stir_time=8.9, batter_sit_time=0, cook1_time=308.8, cook2_time=248.2, use_gripper = True)
+    #OLD::: trial6dylan.16.3.9.50: 112        1641        1642
+    #NEW::: trial6dylan.16.3.9.50: 113        1699        1638
+    #OLD:::trial7 thomas 463        1017         515
+    #NEW:::trail7 thomas 463        1017         515
+    
+    #trial7 josie          214         957        1336
+    #trial 8 luca          434        1298         860
+    #trial 9 keiran        239        1332         649
+    main(stir_time=21.4, batter_sit_time=0, cook1_time=95.7, cook2_time=133.6, use_gripper = True)
+   # main(stir_time=23.9, batter_sit_time=0, cook1_time=133.2, cook2_time=64.9, use_gripper = True)
+    #main(stir_time=13.2, batter_sit_time=0, cook1_time=261.1, cook2_time=282, use_gripper = True)

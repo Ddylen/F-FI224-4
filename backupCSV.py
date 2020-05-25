@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Tue Mar 17 13:19:54 2020
+
+@author: birl
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Mon Feb 17 18:02:41 2020
 
 @author: birl
@@ -44,7 +51,7 @@ def save_CSV(file_name):
         i = i + 1
     """
     
-    extrastring = "REDO"
+    extrastring = ""
     with open(file_name + "filtered" + extrastring + ".csv", 'w', newline='') as file:
         filteredwriter = csv.writer(file)
 
@@ -57,41 +64,33 @@ def save_CSV(file_name):
                 plot_list_z = [entry[2] for entry in joint]
                 invalid_list = [entry[3] for entry in joint]
                 
-                new_plot_list_x = []
-                new_plot_list_y = []
-                new_plot_list_z = []
-                new_invalid_list = []
+                new_plot_list_x = [entry[0] for entry in joint]
+                new_plot_list_y = [entry[1] for entry in joint]
+                new_plot_list_z = [entry[2] for entry in joint]
+                new_invalid_list = [entry[3] for entry in joint]
                 
                 plot_list_x_old = plot_list_x *1
                 plot_list_y_old = plot_list_y *1
                 plot_list_z_old = plot_list_z *1
                 
-                lastgoodvallist = [1,1,1]
-                
-                xlim = [-1, 1]
-                ylim = [-0.5, 2]
-                zlim = [-2,2]
+                lastgoodvallist = [-2, -2, -2]
+        
                 window_length, polyorder = 21, 2
                 for frame in range(len(plot_list_x)):
                     limit = 0.2
                     valgood = True
-                    if plot_list_x[frame] == -1 or plot_list_x[frame] < xlim[0] or plot_list_x[frame] > xlim[1]:
+                    if plot_list_x[frame] == -1:
                         valgood = False
-                    if plot_list_y[frame] == -1 or plot_list_y[frame] < ylim[0] or plot_list_y[frame] > ylim[1]:
+                    if plot_list_y[frame] == -1:
                         valgood = False
-                    if plot_list_z[frame] == -1 or plot_list_z[frame] < zlim[0] or plot_list_z[frame] > zlim[1]:
+                    if plot_list_z[frame] == -1:
                         valgood = False
-
                     if valgood == False:
-                        new_plot_list_x.append(lastgoodvallist[0])
-                        new_plot_list_y.append(lastgoodvallist[1])
-                        new_plot_list_z.append(lastgoodvallist[2])
-                    
+                        plot_list_x[frame] = lastgoodvallist[0]
+                        plot_list_x[frame] = lastgoodvallist[1]
+                        plot_list_x[frame] = lastgoodvallist[2]
                     else:
                         lastgoodvallist = [plot_list_x[frame], plot_list_y[frame], plot_list_z[frame]]
-                        new_plot_list_x.append(plot_list_x[frame])
-                        new_plot_list_y.append(plot_list_y[frame])
-                        new_plot_list_z.append(plot_list_z[frame])
                     """
                     if frame >0 and plot_list_x[frame-1] != -1:
                         if abs(plot_list_x[frame]-plot_list_x[frame-1]) > limit:
@@ -114,9 +113,9 @@ def save_CSV(file_name):
                 filtlistz = plot_list_z
                 
         
-                savgol_plot_list_x = signal.savgol_filter(new_plot_list_x, window_length, polyorder)
-                savgol_plot_list_y = signal.savgol_filter(new_plot_list_y, window_length, polyorder)
-                savgol_plot_list_z = signal.savgol_filter(new_plot_list_z, window_length, polyorder)
+                savgol_plot_list_x = signal.savgol_filter(filtlistx, window_length, polyorder)
+                savgol_plot_list_y = signal.savgol_filter(filtlisty, window_length, polyorder)
+                savgol_plot_list_z = signal.savgol_filter(filtlistz, window_length, polyorder)
                 
                 savgol_plot_list_x = savgol_plot_list_x.tolist()
                 savgol_plot_list_y = savgol_plot_list_y.tolist()
@@ -182,12 +181,10 @@ if __name__ == "__main__":
     #file_name = "trial1dylan.12.3.16.31"
     #file_name = "trial3josie.13.3.13.11"
     #file_name = "trial6dylan.16.3.9.50"
-   #file_name = "trial7thomas.16.3.10.24"
-    
+    #file_name = "trial7thomas.16.3.10.24"
     #file_name = "trial7josie.17.3.10.31"
     #file_name = "testtrial8luca.17.3.11.12"
     file_name = "test9keiran.17.3.11.40"
-    
     #file_name = '1.24.21.47'
     #file_name = '1.24.21.52'
     #file_name = '1.24.22.0'
