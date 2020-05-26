@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon May 11 18:20:26 2020
-
-@author: birl
+Code to plot graphs of the effect of filtering on the raw data in 1D
 """
 import csv
 
@@ -54,7 +52,7 @@ plt.tick_params(axis='both', which='major', labelsize=size-10)
 x = np.arange(len((unfilteredoutput[0][1:])))
 
 
-plt.xlim((0,3050))
+plt.xlim((700,1500))
 plt.ylim((-0.5,0.5))
 plt.plot(x, unfilteredoutput[0][1:], label = 'Unfiltered', color = '#C0C0C0')
 plt.plot(x, filteredoutput[0][1:], label = 'Filtered')

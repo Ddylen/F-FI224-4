@@ -1,4 +1,4 @@
-"""Program to convert camera coords to word coords in the new camera position from 14/02/20, hand tuned so not very precise"""
+"""Program to convert camera coords to word coords in the new camera position from 14/02/20, hand tuned as precise as possible"""
 
 import numpy as np
 import cv2

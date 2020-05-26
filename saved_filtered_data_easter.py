@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun May 17 15:19:37 2020
-
-@author: birl
+Code to filter and save the raw pose trajectories extracted from recordings in a format suitable for the animation code
 """
 
 import numpy as np
@@ -14,9 +12,7 @@ import math
 from get_3D_pose import HAND, BODY, get_arm_3D_coordinates
 
 
-"""TODO:
-    *error could be memoery or could nbe infs/nans, try a memory based fix or inf/ nan based fixe still doesnt work
-    """
+
 
 def savgol_filter(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose, threshold = 0.2):
      #print(range(len(body_3D_pose[0])))

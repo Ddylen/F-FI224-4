@@ -1,5 +1,5 @@
 """
-Example code for recovering the depth of pixels and displaying it on a screen
+Example code for recovering the depth of cicked on pixels and displaying it on a screen
 """
 
 from pykinect2 import PyKinectV2

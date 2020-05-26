@@ -1,4 +1,4 @@
-"""Main file for reading openpose and using that to get 3D coordinates"""
+"""Main file for reading openpose and using that to get 3D coordinates of the joints"""
 
 import numpy as np
 import time

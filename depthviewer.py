@@ -1,4 +1,4 @@
-
+"""code to display the depth data current read by the kinect"""
 
 import numpy as np
 import cv2

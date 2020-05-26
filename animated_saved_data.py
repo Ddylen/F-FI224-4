@@ -1,5 +1,5 @@
 """
-Animate recorded skeleton
+code to animate the recorded skeleton (assumes other files have already been run to process the data)
 """
 
 import pickle

@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Feb 17 18:02:41 2020
-
-@author: birl
+File to save unfiltered data in a CSV file, the data format that is used as the input for the MATLAB code of this project
 """
 
-"""File to save the JSON data in vector format suitable for animation"""
+
 
 import numpy as np
 import time

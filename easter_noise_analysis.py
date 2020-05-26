@@ -1,11 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Apr 30 18:54:03 2020
-
-@author: birl
-"""
-
-"""
 Code for generating plots of x,y,z, theta 1, theta 2 etc
 """
 

@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Apr 30 18:41:47 2020
-
-@author: birl
+Code to save the unfiltered raw pose trajectory from huamn recordings in a format suitable for the animation code
 """
 
-"""File to save the JSON data in vector format suitable for animation"""
 
 import numpy as np
 import time

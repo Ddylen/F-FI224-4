@@ -1,5 +1,5 @@
 """
-Code for imitating recorded arm positions in 3D
+Code for imitating recorded arm positions in 3D using the UR5
 """
 
 from __future__ import print_function

@@ -1,5 +1,5 @@
 """
-display smoothed data from a single plot
+display smoothed data from a single demonstration
 """
 
 import numpy as np
