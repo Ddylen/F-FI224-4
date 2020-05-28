@@ -46,6 +46,7 @@ Before deciding to use this library, please note that it is both undocumented an
 * Remoev junk markdown from end
 * spellcheck
 * did i need any extra stages to get pykinect set up with me environment?
+* only keep final json files in front page of repository
 
 ## Usage
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
