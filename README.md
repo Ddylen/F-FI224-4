@@ -31,7 +31,7 @@ Using the command line allows a numebr of additional parameters to be specified,
 
 At least twice during this project windows defender on the labs Windows 10 dell PC has (apparaently spontaneously) started declaring an error message that 'this file cannot be run on this pc' when attempting to run the demo. Unsintalling (i.e. deleting the OpenPose folder) and reinstalling OpenPose a described above fixes this issue when it comes up
 
-## PyKinect V2
+### PyKinect V2
 
 This project also heavily relied on the PyKinect V2 library to communicate with the Kinect 2 colour and depth camera used. This can be found at the following link: https://github.com/Kinect/PyKinect2. 
 
