@@ -87,11 +87,70 @@ Setting up the UR5 to accept commands via this library requires changing some se
 
 ## Description of Repository Structure
 
+The main folder of the repository contains both the majority of the relavant python files, as well as the UR5's used kinaesthteic trajectories as JSON files. 
+
+### Files
+
+#### Kinect Output Viewer Files
+##### colur_3D_locator
+Allows you to click on a pixel from the Kinect colour stream and read its depth
+
+##### depthviewer
+Allows you to view the current connect depth stream
+
+### Pose Transform Files
+##### coordinate_transforms
+Provides functions to transform from camera centric coordinates to world coordiantes (i.e. z is up), and from world coordinates to the UR5 arm's coordinate system
+
+##### get_3D_pose
+Takes the values recorded by OpenPose in a JSON file, converts them to a more understandable format, then converts the to UR5 arm centric coordinates. Due to quirks with PyKinect2, THIS REQUIRES EITHER A KINECT TO BE PLUGGED INTO THE COMPUTER OF KINECT STUDIO TO BE RUNNING A RECORDING to work, despite the fact the we are operating on saved rather than live kinect data. 
+
+### Data Storage Files
+#### CSV_save_unfiltered_data
+
+##### save_unfiltered_data_easter
+##### save_filtered_data_easter
+
+### Data View/ Analysis Files
+##### display_smoothed_data
+##### plotfilteredunfiltered
+
+##### animate_saved_data
+
+##### easter_noise_analysis
+
+
+### Example Files
+##### follow_me_updated_openpose
+Code to command the UR5 to move its end effector along the trajectory of the wrist from a recording. 
+
+
+### Folders
+
+#### JSONTrajectories
+
+Contains kinaesthetically taught UR5 trajectories that were not used in the final cooking demonstrations
+
+#### bin
+
+Contains the watch.py file which calles openpose from python. This is in the bin folder as it has to be in the same folder as the OpenPoseDemo.exe file (I couldnt figure out how to call a terminal from python in another folder, it might be possible). 
+
+#### MATLABCode
+
+Contains all of this project's MATLAB code. This contains the code for defining bounding boxes around the kitchen tools, extracting time from the detected pose trajectory, carrying out distance correlation and plotting many of the graphs used in my masters report. This code reads CSV pose trajectory files produced by the python code
+
+#### old_python_code
+
+Contains less important/ malfunctioning variants of the code included in the main folder, as well as test code. Could be worth searching through if you want to extend on this project and you find yourself wanting to carry out some process that I also tried and failed to do very well. 
+
 ## Advice
+
+## Kinect Studio
+
+## Matlab Camerea Calibration Tool
 
 # Todo:
 
-* Remoev junk markdown from end
 * spellcheck
-* did i need any extra stages to get pykinect set up with me environment?
 * only keep final json files in front page of repository
+* subfolder readmes
