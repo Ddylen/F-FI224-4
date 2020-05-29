@@ -27,13 +27,21 @@ With the above completed, the demo can be run by exceuting the file 'bin/OpenPos
 
 Using the command line allows a numebr of additional parameters to be specified, like which camera to use (if there are multiple), the maximum number of people to track in an image, whether to save the resulting joint positions and in what format they would be saved, and whether to save the video of the human skeletons superimposed on the imput video, etc. 
 
+The way the output of the demo is/can be structures is desrcribed here: https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md 
+
 #### Issues with the OpenPose Windows Portable Demo
 
 At least twice during this project windows defender on the labs Windows 10 dell PC has (apparaently spontaneously) started declaring an error message that 'this file cannot be run on this pc' when attempting to run the demo. Unsintalling (i.e. deleting the OpenPose folder) and reinstalling OpenPose a described above fixes this issue when it comes up
 
-### PyKinect V2
+### PyKinect2
 
-This project also heavily relied on the PyKinect V2 library to communicate with the Kinect 2 colour and depth camera used. This can be found at the following link: https://github.com/Kinect/PyKinect2. 
+This project also heavily relied on the PyKinect2 library to communicate with the Kinect 2 colour and depth camera used. This can be found at the following link: https://github.com/Kinect/PyKinect2. 
+
+#### Installation Instrctions
+
+The package is avaialble through pip, so can be installed with 
+
+'''pip install pykinect2'''
 
 Before deciding to use this library, please note that it is both undocumented and unsupported, which will increase your develpment time (took me about a month to figure out how to get it to do what I wanted for this project). While it is based on a well documented C++ library (source: https://www.microsoft.com/en-gb/download/details.aspx?id=44561, documentation: https://docs.microsoft.com/en-us/previous-versions/windows/kinect/dn782033(v=ieb.10) ), using the C++ doumentation to get anything more than what functions exist in the python code prooved difficult in my experience. I have written some demonstration programs to better explain to how to use the PyKinect V2 library (https://github.com/Kinect/PyKinect2/issues/79), so hopefully future students wont struggle as much as I did when first using the library. In summary, please note that finding out how to do new commands with this library cans be difficult - even I dont understand what all the defines required to get my code to work mean. 
 
