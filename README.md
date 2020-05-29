@@ -37,11 +37,13 @@ At least twice during this project windows defender on the labs Windows 10 dell 
 
 This project also heavily relied on the PyKinect2 library to communicate with the Kinect 2 colour and depth camera used. This can be found at the following link: https://github.com/Kinect/PyKinect2. 
 
-#### Installation Instrctions
+#### Installation Instructions
 
 The package is avaialble through pip, so can be installed with 
 
-'''pip install pykinect2'''
+````pip install pykinect2````
+
+#### Issues with PyKinect2 - PLEASE READ
 
 Before deciding to use this library, please note that it is both undocumented and unsupported, which will increase your develpment time (took me about a month to figure out how to get it to do what I wanted for this project). While it is based on a well documented C++ library (source: https://www.microsoft.com/en-gb/download/details.aspx?id=44561, documentation: https://docs.microsoft.com/en-us/previous-versions/windows/kinect/dn782033(v=ieb.10) ), using the C++ doumentation to get anything more than what functions exist in the python code prooved difficult in my experience. I have written some demonstration programs to better explain to how to use the PyKinect V2 library (https://github.com/Kinect/PyKinect2/issues/79), so hopefully future students wont struggle as much as I did when first using the library. In summary, please note that finding out how to do new commands with this library cans be difficult - even I dont understand what all the defines required to get my code to work mean. 
 
