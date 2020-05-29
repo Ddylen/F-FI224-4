@@ -93,7 +93,10 @@ Kinect studio can be downloaded from [here](https://www.microsoft.com/en-us/down
 
 The MATLAB camera calibration tool was used to assist in locating the pose of the camera in world coordinates. While it did occasionally work in my case, it often retunred axes that were significantly out from the actual woorld coordinate system I was trying to find (I had to correct such errors manually). I suspect this was because my A3 checkerboards did not take up 20% of the images when laid on the kitchen worksurface, so if using this tool for calibration make sure your checkboards are large enough to take up 20% of the image from the kinect. 
 
+
 I believe that the tool comes with the standard MATLAB install.
+
+<img src=cameracalibrator.PNG  width="450" height="254"/>
 
 Documentation of the tool can be found [here](https://uk.mathworks.com/help/vision/ref/cameracalibrator-app.html)
 
