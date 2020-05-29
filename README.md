@@ -1,6 +1,6 @@
 # F-FI224-4: Robotic cooking through pose extraction from human natural cooking using OpenPose
 
-![](humangif.gif)  ![](robotgif.gif)
+![](humangif.gif | width = 100)  ![](robotgif.gif)
 
 This GitHub repository contains all the code used durin the F-FI224-4 masters project, carried out from 2019-2020 in the BIRL lab
 
