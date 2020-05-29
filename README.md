@@ -4,7 +4,7 @@
 
 This GitHub repository contains all the code used durin the F-FI224-4 masters project, carried out from 2019-2020 in the BIRL lab
 
-## Related Libraries
+## Prerequisites
 
 ### OpenPose
 
@@ -84,6 +84,19 @@ Setting up the UR5 to accept commands via this library requires changing some se
 
 13) Press apply
 
+### Kinect Studio
+This software allows you toe record and replay colour and depth video from the kinect. Some parts of my code require the computer to be connect to a kinect, said programs also work if the computer as Kinect Studio open and playing a recorded video (note that such videos can be played on loop so a long recording isnt necceary, which is beenficial as kinect stdio recordings take up a lot of memeory)
+
+Kinect studio can be downloaded from [here](https://www.microsoft.com/en-us/download/details.aspx?id=44561)
+
+### Matlab Camerea Calibration Tool
+
+The MATLAB camera calibration tool was used to assist in locating the pose of the camera in world coordinates. While it did occasionally work in my case, it often retunred axes that were significantly out from the actual woorld coordinate system I was trying to find (I had to correct such errors manually). I suspect this was because my A3 checkerboards did not take up 20% of the images when laid on the kitchen worksurface, so if using this tool for calibration make sure your checkboards are large enough to take up 20% of the image from the kinect. 
+
+I believe that the tool comes with the standard MATLAB install.
+
+Documentation of the tool can be found [here](https://uk.mathworks.com/help/vision/ref/cameracalibrator-app.html)
+
 
 ## Description of Repository Structure
 
@@ -145,9 +158,7 @@ Contains less important/ malfunctioning variants of the code included in the mai
 
 ## Advice
 
-## Kinect Studio
 
-## Matlab Camerea Calibration Tool
 
 # Todo:
 
