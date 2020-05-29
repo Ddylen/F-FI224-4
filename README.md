@@ -7,11 +7,11 @@ This GitHub repository contains all the code used durin the F-FI224-4 masters pr
 
 ### OpenPose
 
-This project has relied heavy on to OpenPose pretrained neural network to localise joint positions in 2D colour video. This was chosen both because it track fingers, and because it has a compliation free demo. The main OpenPose repository can be found here: https://github.com/CMU-Perceptual-Computing-Lab/openpose
+This project has relied heavy on to OpenPose pretrained neural network to localise joint positions in 2D colour video. This was chosen both because it track fingers, and because it has a compliation free demo. The main OpenPose repository can be [found here](https://github.com/CMU-Perceptual-Computing-Lab/openpose)
 
 #### OpenPose Windows Portable Demo Installation Instructions
 
-1) Download latest version of the demo from this link: https://github.com/CMU-Perceptual-Computing-Lab/openpose/releases. Each version has multiple files attached to it, im unsure as to the exact difference between these. This project has been using 'openpose-1.5.1-binaries-win64-gpu-python-flir-3d_recommended', but a more recent version has been released since then. To reiterate, you only need ONE of the cluster of files listed in the most recent version
+1) Download latest version of the demo from [this link](https://github.com/CMU-Perceptual-Computing-Lab/openpose/releases). Each version has multiple files attached to it, im unsure as to the exact difference between these. This project has been using 'openpose-1.5.1-binaries-win64-gpu-python-flir-3d_recommended', but a more recent version has been released since then. To reiterate, you only need ONE of the cluster of files listed in the most recent version
 
 2) Extract downloaded zip file
 
@@ -27,7 +27,7 @@ With the above completed, the demo can be run by exceuting the file 'bin/OpenPos
 
 Using the command line allows a numebr of additional parameters to be specified, like which camera to use (if there are multiple), the maximum number of people to track in an image, whether to save the resulting joint positions and in what format they would be saved, and whether to save the video of the human skeletons superimposed on the imput video, etc. 
 
-The way the output of the demo is/can be structures is desrcribed here: https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md 
+The way the output of the demo is/can be structures is [described here](https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md)
 
 #### Issues with the OpenPose Windows Portable Demo
 
@@ -35,17 +35,19 @@ At least twice during this project windows defender on the labs Windows 10 dell 
 
 ### PyKinect2
 
-This project also heavily relied on the PyKinect2 library to communicate with the Kinect 2 colour and depth camera used. This can be found at the following link: https://github.com/Kinect/PyKinect2. 
+This project also heavily relied on the PyKinect2 library to communicate with the Kinect 2 colour and depth camera used. This can be found at the following [link](https://github.com/Kinect/PyKinect2).
 
 #### Installation Instructions
 
 The package is avaialble through pip, so can be installed with 
 
-````pip install pykinect2````
+````bash
+pip install pykinect2
+````
 
 #### Issues with PyKinect2 - PLEASE READ
 
-Before deciding to use this library, please note that it is both undocumented and unsupported, which will increase your develpment time (took me about a month to figure out how to get it to do what I wanted for this project). While it is based on a well documented C++ library (source: https://www.microsoft.com/en-gb/download/details.aspx?id=44561, documentation: https://docs.microsoft.com/en-us/previous-versions/windows/kinect/dn782033(v=ieb.10) ), using the C++ doumentation to get anything more than what functions exist in the python code prooved difficult in my experience. I have written some demonstration programs to better explain to how to use the PyKinect V2 library (https://github.com/Kinect/PyKinect2/issues/79), so hopefully future students wont struggle as much as I did when first using the library. In summary, please note that finding out how to do new commands with this library cans be difficult - even I dont understand what all the defines required to get my code to work mean. 
+Before deciding to use this library, please note that it is both undocumented and unsupported, which will increase your develpment time (took me about a month to figure out how to get it to do what I wanted for this project). While it is based on a well documented C++ library ([source](https://www.microsoft.com/en-gb/download/details.aspx?id=44561), [documentation](https://docs.microsoft.com/en-us/previous-versions/windows/kinect/dn782033(v=ieb.10)) ), using the C++ doumentation to get anything more than what functions exist in the python code prooved difficult in my experience. I have written some demonstration programs to better explain to how to use the PyKinect V2 library ([linked here](https://github.com/Kinect/PyKinect2/issues/79)), so hopefully future students wont struggle as much as I did when first using the library. In summary, please note that finding out how to do new commands with this library cans be difficult - even I dont understand what all the defines required to get my code to work mean. 
 
 ## Description of Repository Structure
 
@@ -57,28 +59,3 @@ Before deciding to use this library, please note that it is both undocumented an
 * spellcheck
 * did i need any extra stages to get pykinect set up with me environment?
 * only keep final json files in front page of repository
-
-## Usage
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
-
-```bash
-pip install foobar
-```
-
-## Usage
-
-```python
-import foobar
-
-foobar.pluralize('word') # returns 'words'
-foobar.pluralize('goose') # returns 'geese'
-foobar.singularize('phenomena') # returns 'phenomenon'
-```
-
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
-
-## License
-[MIT](https://choosealicense.com/licenses/mit/)
