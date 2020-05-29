@@ -1,5 +1,8 @@
 # F-FI224-4: Robotic cooking through pose extraction from human natural cooking using OpenPose
 
+![](humangif.gif)
+
+![](robotgif.gif)
 
 This GitHub repository contains all the code used durin the F-FI224-4 masters project, carried out from 2019-2020 by Dylan Danno with supervision from Fumiya Iida and assistance from Simon Hauser and Thomas Thuruthel
 
