@@ -1,6 +1,6 @@
 # F-FI224-4: Robotic cooking through pose extraction from human natural cooking using OpenPose
 
-<img src=humangif.gif width="450" height="254" /> <img src=robotgif.gif width="450" height="254" />
+<img src=githubgraphics/humangif.gif width="450" height="254" /> <img src=githubgraphics/robotgif.gif width="450" height="254" />
 
 This GitHub repository contains all the code used durin the F-FI224-4 masters project, carried out from 2019-2020 in the BIRL lab
 
@@ -96,7 +96,7 @@ The MATLAB camera calibration tool was used to assist in locating the pose of th
 
 I believe that the tool comes with the standard MATLAB install.
 
-<img src=cameracalibrator.PNG  width="450" height="254"/>
+<img src=githubgraphics/cameracalibrator.PNG  width="450" height="254"/>
 
 Documentation of the tool can be found [here](https://uk.mathworks.com/help/vision/ref/cameracalibrator-app.html)
 
