@@ -1,1 +1,1 @@
-This folder has been left empty, but is included in the repo as other code I have written saves files to it
+This folder has been left empty, but is included in the repo this is where the (raw) 3D pose trajectory of the demonstrator is cached by the python code

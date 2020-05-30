@@ -1,1 +1,1 @@
-This folder has been left empty, but is included in the repo as other code I have written saves files to it
+This folder has been left empty, but is included in the repo as this is where the python code saves the colour and depth frames from the demonstrations to. These files are large, so can be deleted once you have extracted and saved the 3D pose trajectory of the demonstrator

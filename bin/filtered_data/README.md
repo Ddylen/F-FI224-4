@@ -1,1 +1,1 @@
-This folder has been left empty, but is included in the repo as other code I have written saves files to it
+This folder has been left empty, but is included in the repo as this is where the filtered 3D pose trajectory of the demonstrator is stored
