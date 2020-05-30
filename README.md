@@ -183,7 +183,7 @@ Empty folder that depthviewer.py can save images from the recorded Kinect depth 
 
 ## Replicating my Work
 
-First, note that the code in this repository is meant to be saved inside the main folder of the downloaded OpenPose folder (hence the name). Folder names in this repository that also occur in OpenPose indicate that the relevant files should be places inside the corresponding OpenPose folder.
+First, note that the code in this repository is meant to be saved inside the main folder of the downloaded OpenPose package (hence the name). Folder names in this repository that also occur in OpenPose indicate that the relevant files should be places inside the corresponding OpenPose folder.
 
 With that done, the steps to replicating my work are
 
