@@ -171,6 +171,14 @@ Contains all of this project's MATLAB code. This contains the code for defining 
 
 Contains less important/ malfunctioning variants of the code included in the main folder, as well as test code. Could be worth searching through if you want to extend on this project and you find yourself wanting to carry out some process that I also tried and failed to do very well. 
 
+#### githubgraphics
+
+Contains the gifs/images used in this markdown file
+
+#### depthimages
+
+Empty folder that depthviewer.py can save images from the recorded Kinect depth video to
+
 ## Using this repository
 
 The code in this repository is meant to be saved inside the main folder of the downloaded OpenPose fodler (hence the name). Folder names names in this repository that also occur in OpenPose indicate that the relavent files should be places inside the corresponding OpenPose folder.
