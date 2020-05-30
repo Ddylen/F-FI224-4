@@ -152,6 +152,8 @@ Code to get the standard deviation of the wrist position (useful for determining
 ###### follow_me_updated_openpose
 Code to command the UR5 to move its end effector along the trajectory of the wrist from a recording. 
 
+#### JSON Files
+Various JSON files that contain the kinaesthetically taught trajectories that the UR5 uses to cook are also included in this folder
 
 ### Folders
 
