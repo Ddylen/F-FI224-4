@@ -114,6 +114,10 @@ Allows you to click on a pixel from the Kinect colour stream and read its depth
 ###### depthviewer
 Allows you to view the current connect depth stream
 
+###### bin/watch
+Main file for recording data from the Kinect, stiching it into videos and then calling OpenPose to run on it. Must be located in the bin folder to call OpenPose correctly (as in, i couldnt figure out how to get python to call a terminal command in another folder)
+
+
 #### Pose Transform Files
 ###### coordinate_transforms
 Provides functions to transform from camera centric coordinates to world coordiantes (i.e. z is up), and from world coordinates to the UR5 arm's coordinate system
@@ -180,3 +184,4 @@ Note many parts of the code I have written rely on loading/ saving data from cus
 * spellcheck
 * only keep final json files in front page of repository
 * subfolder readmes
+* upload all required empty data storage folders
