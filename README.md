@@ -123,18 +123,26 @@ Takes the values recorded by OpenPose in a JSON file, converts them to a more un
 
 #### Data Storage Files
 ##### CSV_save_unfiltered_data
+Saves unfilitered pose trajectory data as a CSV file for the MATLAB analysis code
 
 ###### save_unfiltered_data_easter
+Saves unfiltered pose trajectory as a pickle file, for analysis/animation in python
+
 ###### save_filtered_data_easter
+Saves filtered pose trajectory as a pickle file, for analysis/animation in python
 
 #### Data View/ Analysis Files
 ###### display_smoothed_data
+Plots smoothed 2D wrist trajectory
+
 ###### plotfilteredunfiltered
+Plots both the smoothed and unsmoothed X trajectory of the wrist to show the effect of filtering
 
 ###### animate_saved_data
+Render a 3D wireframe skeleton to show the tracked pose (legs deliberately not rendered since their depth comes out wrong as they are under the table)
 
 ###### easter_noise_analysis
-
+Code to get the standard deviation of the wrist position (useful for determining tracking accuarcy from videos where the wrist is held stationary)
 
 #### Example Files
 ###### follow_me_updated_openpose
@@ -159,7 +167,11 @@ Contains all of this project's MATLAB code. This contains the code for defining 
 
 Contains less important/ malfunctioning variants of the code included in the main folder, as well as test code. Could be worth searching through if you want to extend on this project and you find yourself wanting to carry out some process that I also tried and failed to do very well. 
 
-## Advice
+## Using this repository
+
+The code in this repository is meant to be saved inside the main folder of the downloaded OpenPose fodler (hence the name). Folder names names in this repository that also occur in OpenPose indicate that the relavent files should be places inside the corresponding OpenPose folder.
+
+Note many parts of the code I have written rely on loading/ saving data from custom folders. 
 
 
 
