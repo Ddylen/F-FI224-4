@@ -126,8 +126,8 @@ Provides functions to transform from camera centric coordinates to world coordin
 Takes the values recorded by OpenPose in a JSON file, converts them to a more understandable format, then converts the to UR5 arm centric coordinates. Due to quirks with PyKinect2, THIS REQUIRES EITHER A KINECT TO BE PLUGGED INTO THE COMPUTER OF KINECT STUDIO TO BE RUNNING A RECORDING to work, despite the fact the we are operating on saved rather than live Kinect data. 
 
 #### Data Storage Files
-###### CSV_save_unfiltered_data
-Saves unfiltered pose trajectory data as a CSV file for the MATLAB analysis code
+###### CSV_save_filtered_data
+Saves filtered pose trajectory data as a CSV file for the MATLAB analysis code
 
 ###### save_unfiltered_data_easter
 Saves unfiltered pose trajectory as a pickle file, for analysis/animation in python
