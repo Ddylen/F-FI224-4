@@ -108,21 +108,21 @@ The main folder of the repository contains both the majority of the relavant pyt
 ### Files
 
 #### Kinect Output Viewer Files
-##### colur_3D_locator
+###### colur_3D_locator
 Allows you to click on a pixel from the Kinect colour stream and read its depth
 
-##### depthviewer
+###### depthviewer
 Allows you to view the current connect depth stream
 
 #### Pose Transform Files
-##### coordinate_transforms
+###### coordinate_transforms
 Provides functions to transform from camera centric coordinates to world coordiantes (i.e. z is up), and from world coordinates to the UR5 arm's coordinate system
 
-##### get_3D_pose
+###### get_3D_pose
 Takes the values recorded by OpenPose in a JSON file, converts them to a more understandable format, then converts the to UR5 arm centric coordinates. Due to quirks with PyKinect2, THIS REQUIRES EITHER A KINECT TO BE PLUGGED INTO THE COMPUTER OF KINECT STUDIO TO BE RUNNING A RECORDING to work, despite the fact the we are operating on saved rather than live kinect data. 
 
 #### Data Storage Files
-##### CSV_save_unfiltered_data
+###### CSV_save_unfiltered_data
 Saves unfilitered pose trajectory data as a CSV file for the MATLAB analysis code
 
 ###### save_unfiltered_data_easter
