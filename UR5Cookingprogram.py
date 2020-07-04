@@ -1,22 +1,8 @@
-
-# -*- coding: utf-8 -*-
-"""
-To Do:
-•	Still from cooking process with clean setup
-o	Add x/y/z coordinates to said still
-•	Recording from Kinect of robot cooking
-•	Improve my process flowchart
-•	Combine my process flowchart with the recipe flowchart so that they are side by side
-•	Write up report
-
-"""
-
 """
 Final Program for carrying out pancake cooking with the UR5
 """
 
 import sys
-sys.path.insert(1,r'C:\Users\birl\Documents\updated_ur5_controller\Generic_ur5_controller')
 import numpy as np
 import math
 import time
@@ -24,43 +10,43 @@ import time
 import kg_robot as kgr
 import waypoints as wp
 
+sys.path.insert(1,r'C:\Users\birl\Documents\updated_ur5_controller\Generic_ur5_controller')
+
+#Define tool locations
 stirrer_location = [0.159, -0.53, 0.09]
 ladel_location = [0.04,-0.562, 0.113]
-
-#spatula_location = [-0.103, -0.507, 0.116]
 spatula_location = [-0.103, -0.507, 0.113]
 whisk_location = [0.17, -0.422, 0.127]
-
 cup_1_location = [0.340, -0.501, 0.156]
 cup_2_location = [0.215, -0.501, 0.156]
-x_orinetation = [1.04, 2.50, 2.50]
+
+#Define gripper orientations that work better/ worse with different types of tool
 y_orientation = [0.60,-1.5, -0.67]
-y_orientation_reverse = [1.78,0.52, 1.69]
-vertical_orientation = [0.98, -2.42, -2.63]
 cup_orientation = [1.34, -0.65, 0.65]
 spatula_orientation = [0.608,-1.455, -0.743]
-
 drop_spatula_orientation = [0.659, -1.40, -0.905]
 drop_spatula_location = [-0.104, -0.519, 0.11]
 
-"""
-TODO:
-    *More circular whisk actions
-    *drop spatula correctly
-    *get pickup working by implementing a scraping motion over the pan
-    *get rid of the pause in the middle of the flip
-    * stop the minor arm-bowl collisions
-    * add a print statement to the sleep sections so that I know how much longer it wants to sleep
-"""    
+
 def grab_item(robo, location, orientation, move_time = 5, angle = 85, old = False):
+    """Function to grab an item with the hand closed to a variety of angles"""
+    
+    #define offset to allow hand to move above item without hitting it on the way there
     move_height_offset = 0.1
+    
+    #Check flag for if the older version of the gripping function on the arduino should be used
     if old == False:
         robo.open_hand()
     else:
         robo.open_hand_old()
+        
     time.sleep(0.2)
+    
+    #Move to pick up tool
     robo.movel([location[0], location[1], location[2]+move_height_offset, orientation[0], orientation[1], orientation[2]], min_time = 1)
     robo.movel([location[0], location[1], location[2], orientation[0], orientation[1], orientation[2]], min_time = 3)
+    
+    #Close hand
     print("CLOSING HAND")
     if angle == 55:
         robo.close_hand()
@@ -78,12 +64,13 @@ def grab_item(robo, location, orientation, move_time = 5, angle = 85, old = Fals
         robo.fat_close_hand()
     else:
         raise ValueError
-        
+    
+    #Move gripper up with tool
     robo.movel([location[0], location[1], location[2]+move_height_offset, orientation[0], orientation[1], orientation[2]], min_time = 5)
-
 
     
 def drop_item(robo, location, orientation,move_time = 5):
+    """Funtion to drop an item"""
     move_height_offset = 0.3
     robo.movejl([location[0], location[1], location[2]+move_height_offset, orientation[0], orientation[1], orientation[2]], min_time = move_time)
     robo.movejl([location[0], location[1], location[2]+0.02, orientation[0], orientation[1], orientation[2]], min_time = move_time, wait = True)

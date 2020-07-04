@@ -1,31 +1,24 @@
-"""Main file for reading openpose and using that to get 3D coordinates of the joints"""
-
+"""
+Functions for reading openpose data and using that to get 3D coordinates of the joints
+"""
 import numpy as np
-import time
-import pickle
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import pickle
 import cv2
 import ctypes
-import time
 import json
 import glob
 import os
-parentDirectory = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 from enum import Enum
 import math
-
 from pykinect2 import PyKinectV2
 from pykinect2.PyKinectV2 import *
 from pykinect2 import PyKinectRuntime
-
 from coordinate_transforms import convert_to_arm_coords
 
-"""
-TODO
-* Find appropriate joint confidence threshold
-* Add some code to highlight on the 2D image which joint it is that you cant see
-"""
+parentDirectory = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+
 
 class HAND(Enum):
     """Enum of what hand joint numbers /3 represent"""
@@ -108,11 +101,17 @@ def track_body(folder):
     right_hand_2D_pose = [ [] for i in range(hand_tracked_joints_num)]
     body_2D_pose = [ [] for i in range(body_tracked_joints_num)]
     
-    #Iteraively store joint positions in appropriate lists, if there is an error append x= -1, y = -1, confidence = -1 to the list
+    #Initialse frame tracking variable
     frame_num = 0
+    
+    #Iteraively store joint positions in appropriate lists, if there is an error append x= -1, y = -1, confidence = -1 to the list
     for json_dict in json_list:
+        
+        #Print progress messages to avoid long pauses with no output when processing long recordings
         if frame_num%200 == 0:
              print("Tracking frame", frame_num)
+             
+        #try to extact the 2D recorded positions of each joint from openpose
         try:
             for body_joint in BODY:
                 body_2D_pose[body_joint.value].append([json_dict['people'][0].get('pose_keypoints_2d')[3*body_joint.value], json_dict['people'][0].get('pose_keypoints_2d')[3*body_joint.value+1], json_dict['people'][0].get('pose_keypoints_2d')[3*body_joint.value+2]])
@@ -121,6 +120,7 @@ def track_body(folder):
                 right_hand_2D_pose[hand_joint.value].append([json_dict['people'][0].get('hand_left_keypoints_2d')[3*hand_joint.value], json_dict['people'][0].get('hand_left_keypoints_2d')[3*hand_joint.value+1], json_dict['people'][0].get('hand_left_keypoints_2d')[3*hand_joint.value+2]])
                 left_hand_2D_pose[hand_joint.value].append([json_dict['people'][0].get('hand_right_keypoints_2d')[3*hand_joint.value], json_dict['people'][0].get('hand_right_keypoints_2d')[3*hand_joint.value+1], json_dict['people'][0].get('hand_right_keypoints_2d')[3*hand_joint.value+2]])
         
+        #exception for if openpose lost track of the human skeleton, leading the lists measured above to be empty
         except IndexError:
             for body_joint in BODY:
                 body_2D_pose[body_joint.value].append([-1,-1,-1])
@@ -131,13 +131,15 @@ def track_body(folder):
         frame_num +=1
     return body_2D_pose, left_hand_2D_pose, right_hand_2D_pose
    
-#REMEBER TO HAVE A KINECT CONNECTED WHEN RUNNING
-def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame = False):
-    """Takes saved 2D arm coordinates from track_body and turns them into list of 3D arm coordinates"""
     
+def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame = False, cropdatato01 = False):
+    """Takes saved 2D arm coordinates from track_body and turns them into list of 3D arm coordinates
+    NEEDS TO HAVE A KINECT OR RUNNING KINECT STUDIO RECORDING CONNECTED WHEN THIS PROGRAM IS RUN, because of requirements from PyKinect2"""
     
-    convert_to_am_coords_bad_count = 0
     print("calculating 3D pose in arm coordinates")
+    
+    #keep a could of how many conversion fail - a high number could suggest that no kinect/ running kinectstudio recording is present
+    convert_to_am_coords_bad_count = 0
     
     #Load lists of 2D arm coords, check they contain data
     body_2D_pose, left_hand_2D_pose, right_hand_2D_pose = track_body(filename)
@@ -157,7 +159,8 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
     
     #Defined where aved depth data is stored
     depthdatafile = open("bin/rawdata/DEPTH." + filename + ".pickle", "rb")
-
+    
+    #close any opencv windows that were previously open, so you dont end up with a huge number of tabs when you run this file repeatedly
     cv2.destroyAllWindows()
     
     #Check number of joints to track
@@ -174,21 +177,23 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
     right_hand_3D_pose = [ [] for i in range(hand_tracked_joints_num)]
     body_3D_pose = [ [] for i in range(body_tracked_joints_num)]
     
-    #print("Total number of frames is ", len(body_2D_pose[0]))
     #Iterate over each frame
     for framenum in range(len(body_2D_pose[0])):
         
+        #Print progress messages
         if framenum%100 == 0:
             print("Finding points in frame ", framenum)
-        depthframe = pickle.load(depthdatafile) #need to do this once per frame
+            
+        #Load the single relevant (to this iteration) depth frame from pickle
+        depthframe = pickle.load(depthdatafile) 
         
-        #Carry out certain actions if you want an image of where all the tracked joints are (20x slower)
+        #Carry out certain actions if you want an image of where all the tracked joints are (this makes the program run 20x slower)
         if show_each_frame == True:
             frame = depthframe
             frame = frame.astype(np.uint8)
             frame = np.reshape(frame, (424, 512))
         
-        #Defines to allow depth mapping to work correctly     
+        #More defines to allow depth mapping to work correctly     
         ctypes_depth_frame = np.ctypeslib.as_ctypes(depthframe.flatten())
         L = depthframe.size
         kinect._mapper.MapColorFrameToDepthSpace(ctypes.c_uint(512 * 424), ctypes_depth_frame, ctypes.c_uint(1920 * 1080), color2depth_points)
@@ -213,6 +218,7 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
             #Iterate over each joint
             for joint in tracked_class:
                 
+                #Read 2D joint position
                 position = raw_coords_list[joint.value][framenum]
                 
                 #Say we havent lost track if the confidence value in the joint position is over a certain threshold
@@ -221,82 +227,76 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                     
                 else:
                     lost_track = True
-                    #print('a')
-                    
+                  
+                #Catch the joint position we returned when openpose cant see a skeleton
                 if position == [-1,-1,-1]:
                     lost_track = True
-                    #print('b')
-                if position == [0,0,0]: #what openpose returns if it cant see
+
+                #Catch the position openpose sometimes fills its first JSON message with
+                if position == [0,0,0]: 
                     lost_track = True
-                    #print('c')
                 
-                #I think this filtering is all in the wrong place...
+                #Catch any other invalid points - this may be redundant given previous filtering stages, but the effect of removing this has not been extensively tested
                 if math.isinf(position[0]) == True: 
                     arm_coords = [0,0,0.1]
                     lost_track = True
-                    #print('d')
+
                 if math.isinf(position[1]) == True:  
                     arm_coords = [0,0,0.2]
                     lost_track = True
-                    #print('e')
+
                 if math.isinf(position[2]) == True:
                     arm_coords = [0,0,0.3]
                     lost_track = True
-                    #print('f')
+
                 if math.isnan(position[0]) == True:
                     arm_coords = [0,0,0.4]
                     lost_track = True
-                    #print('g')
+
                 if math.isnan(position[1]) == True:
                     arm_coords = [0,0,0.5]
                     lost_track = True
-                    #print('h')
+
                 if math.isnan(position[2]) == True:
                     arm_coords = [0,0,0.6]
                     lost_track = True
-                    #print('i')
-                if lost_track == False:
 
-                    if position[0]>1 :
-                        position[0] = 1-1/1920         
- 
-                    if position[0]<0 :
-                        position[0] = 0    
-                        
-                    if position[1]>1 :
-                        position[1] = 1-1/1920         
- 
-                    if position[1]<0 :
-                        position[1] = 0  
+                if lost_track == False:
+                    
+                    #Include option to crop data points that are over 1m away to allow for better depth visualisation in later code
+                    if cropdatato01 == True:
+                        if position[0]>1 :
+                            position[0] = 1-1/1920         
+     
+                        if position[0]<0 :
+                            position[0] = 0    
+                            
+                        if position[1]>1 :
+                            position[1] = 1-1/1920         
+     
+                        if position[1]<0 :
+                            position[1] = 0  
 
                     #find x and y in pixel (not normalised pixel) position in the 2D image
                     x = int(position[0]*1920)
                     y = int(position[1]*1080)
                     
-  
-
                     #Find 3D position of each pixel using Colour_to_camera method
                     x_3D = csps1[y*1920 + x].x
                     y_3D = csps1[y*1920 + x].y
                     z_3D = csps1[y*1920 + x].z
 
-                   
+                    #find joint position in the robot arm coordinate frame
                     arm_coords  = convert_to_arm_coords(x_3D, y_3D, z_3D)
-                    if math.isnan(arm_coords[0]):
-                        arm_coords = [-1,-1,-0.9]
-                        lost_track = True
-                        #print('j')
-                        convert_to_am_coords_bad_count = convert_to_am_coords_bad_count + 1
-                        #raise ImportError("Recieveing nan for 3D position, are you sure that kinect studio is running/ the kinect is connected?") 
-
+                    
+                    #Warning message if errors like what occur if no Kinect is connected to the computer are seen
                     if convert_to_am_coords_bad_count > 1000:
-                        print("|||\\\___Lots of bad arm coords being returned, are you sure kinect studio is running or a Kinect is connected?___///|||")
+                        print("|||\\\___WARNING: Lots of bad arm coords being returned, are you sure kinect studio is running or a Kinect is connected?___///|||")
                         
+                        #only print the above for every 1000 missed joints
                         convert_to_am_coords_bad_count = 0
-                    #if joint == BODY.RIGHT_ELBOW:
-                       #print(framenum, lost_track)
-                        #print(position)
-                        #print(arm_coords) 
+                    
+                    #Code for visualising where the tracked joints are in the depth image
                     if show_each_frame == True:
                         try:
                         
@@ -311,8 +311,8 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                             x_pixels = 1
                             y_pixels = 1 
                     
-                        #Display the 2D joint positions on the depth image if a flag is set (flag makes program run 20x slower)
-                        if show_each_frame == True and lost_track == False:
+                        #Highlight the 2D joint positions on the depth image 
+                        if lost_track == False:
                             cv2.circle(frame, (x_pixels,y_pixels), 5, (255, 0, 255), -1)
 
                 if lost_track == True:
@@ -350,13 +350,13 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
 
 if __name__ == '__main__': 
 
-    #start_time = time.time()
-    #body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('1.23.17.49', show_each_frame =  False)
-    #body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('1.24.21.39', show_each_frame =  False)
-    body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('feb3.3.3.15.30', show_each_frame =  False)
+    #Load an example file
+    body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('stationarytrial3.17.3.9.43', show_each_frame =  False)
+    
+    #Print some values from it
     print(body_3D_pose[BODY.RIGHT_ELBOW.value])
-    """
-    #print("Time taken is", time.time()-start_time)
+    
+    #Convert the right palms trajectory into a form for 3D plotting
     x_sec= []
     y_sec= []
     z_sec = []
@@ -367,11 +367,11 @@ if __name__ == '__main__':
             x_sec.append(pos[0])
             y_sec.append(pos[1])
             z_sec.append(pos[2])
-
     
+    #Plot the right palms trajectory in 3D
     fig = plt.figure()
     ax = Axes3D(fig)
     ax.scatter(x_sec, y_sec, z_sec)
     plt.show()
-    """
+
 

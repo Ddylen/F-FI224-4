@@ -488,7 +488,7 @@ print(len(BODY3DPOSE))
 
 results_list = get_plot_list(BODY3DPOSE, LEFTHAND3DPOSE, RIGHTHAND3DPOSE)
 
-datafile = open("bin/filtered_data/FULL" + file_name + ".pickle", "wb")
+datafile = open("bin/filtered_data/FULL" + file_name + name + ".pickle", "wb")
 pickle.dump(results_list, datafile)
 
 print("Time taken is", time.time()-old_time)
