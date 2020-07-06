@@ -1,26 +1,25 @@
-# -*- coding: utf-8 -*-
 """
 File to save unfiltered data in a CSV file, the data format that is used as the input for the MATLAB code of this project
 """
-
-
-
 import numpy as np
 import time
 from scipy import signal
 import pickle
 import sys
 import math
-from get_3D_pose import HAND, BODY, get_arm_3D_coordinates
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.cm as cm
 import csv
 from scipy import signal
 
+from get_3D_pose import HAND, BODY, get_arm_3D_coordinates
+
+
 def save_CSV(file_name):
-    old_time = time.time()
+    """Save filtered trajectory to CSV"""
     
+    #Get 3D pose in arm coordinates
     BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE = get_arm_3D_coordinates(file_name, confidence_threshold = 0)
     """
     for jointslist in BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE:
@@ -42,13 +41,23 @@ def save_CSV(file_name):
         i = i + 1
     """
     
+    #define a customn string for the CSV file names
     extrastring = "REDO"
+    
+    #Save file name
     with open(file_name + "filtered" + extrastring + ".csv", 'w', newline='') as file:
+        
+        #Open CSV writer
         filteredwriter = csv.writer(file)
-
+        
+        #Iterate over lists of body and hand poses
         for pose_list in BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE:
+            
             i = 0
+            
+            #Iterate over each tracked point on the list
             for joint in pose_list:
+                print(joint)
                 joint = joint[1:]
                 plot_list_x = [entry[0] for entry in joint]
                 plot_list_y = [entry[1] for entry in joint]
@@ -99,7 +108,10 @@ def save_CSV(file_name):
                         if abs(plot_list_z[frame]-plot_list_z[frame-1]) > limit:
                             plot_list_z[frame] = plot_list_z[frame-1]
                     """
-
+                
+                for val in plot_list_x:
+                    print(val)
+                        
                 if pose_list == BODY3DPOSE:
                     ident_string = BODY(i).name
                 elif pose_list == LEFTHAND3DPOSE:
@@ -107,11 +119,16 @@ def save_CSV(file_name):
                 elif pose_list == RIGHTHAND3DPOSE:
                     ident_string = "Right" + HAND(i).name
                     
+
+                
+
+                        
+                """      
                 filtlistx = plot_list_x
                 filtlisty = plot_list_y
                 filtlistz = plot_list_z
+                """
                 
-        
                 savgol_plot_list_x = signal.savgol_filter(new_plot_list_x, window_length, polyorder)
                 savgol_plot_list_y = signal.savgol_filter(new_plot_list_y, window_length, polyorder)
                 savgol_plot_list_z = signal.savgol_filter(new_plot_list_z, window_length, polyorder)
@@ -184,7 +201,11 @@ if __name__ == "__main__":
     
     #file_name = "trial7josie.17.3.10.31"
     #file_name = "testtrial8luca.17.3.11.12"
-    file_name = "test9keiran.17.3.11.40"
+    
+    
+    #file_name = "test9keiran.17.3.11.40"
+    
+    file_name = 'stationarytrial3.17.3.9.43'
     
     #file_name = '1.24.21.47'
     #file_name = '1.24.21.52'

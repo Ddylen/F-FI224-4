@@ -137,8 +137,8 @@ def track_body(folder):
 def filter_out_invalid(pos, threshold):
     """Function to mark clealy invalid points as bad"""
     
-    #initialise armpos (will be overwritten later if point is good)
-    armpos = [-3,-3,-3]
+    armpos = pos
+    
     
     #Say we havent lost track if the confidence value in the joint position is over a certain threshold
     if pos[2] > threshold:
@@ -236,6 +236,8 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
     
     print("calculating 3D pose in arm coordinates")
     
+    i = 0
+    
     #keep a could of how many conversion fail - a high number could suggest that no kinect/ running kinectstudio recording is present
     convert_to_am_coords_bad_count = 0
     
@@ -307,7 +309,7 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                 position = raw_coords_list[joint.value][framenum]
                 
                 #Filter out invalid points
-                arm_coords, lost_track = filter_out_invalid(position, confidence_threshold)
+                position, lost_track = filter_out_invalid(position, confidence_threshold)
                 
                 if lost_track == False:
                     
@@ -319,10 +321,23 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                     x_3D = csps1[y*1920 + x].x
                     y_3D = csps1[y*1920 + x].y
                     z_3D = csps1[y*1920 + x].z
-
+                    
+                    
+                    #Filter out invalid points again
+                    if x_3D == -np.inf or y_3D == -np.inf or z_3D == -np.inf:
+                        x_3D, y_3D, z_3D = -2, -2, -2
+                        lost_track = True
+                        
                     #find joint position in the robot arm coordinate frame
                     arm_coords  = convert_to_arm_coords(x_3D, y_3D, z_3D)
                     
+                    """
+                    if joint == HAND.INDEX_TIP:
+                        #print(x,y)
+                        print(x_3D, y_3D, z_3D, type(x_3D))
+                        #print(arm_coords)
+                    """
+                        
                     #Warning message if errors like what occur if no Kinect is connected to the computer are seen
                     if convert_to_am_coords_bad_count > 1000:
                         print("|||\\\___WARNING: Lots of bad arm coords being returned, are you sure kinect studio is running or a Kinect is connected?___///|||")
@@ -342,15 +357,34 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                 #Add 3D joint positions, and whether we classify that joint as lost, in the approproate list
                 if listtype == "BODY":
                     body_3D_pose[joint.value].append([arm_coords[0],arm_coords[1],arm_coords[2], lost_track])
+                    #print(body_3D_pose[joint.value])
+                    #print(" ")
                     
                 elif listtype == "LEFTHAND":
                     left_hand_3D_pose[joint.value].append([arm_coords[0],arm_coords[1],arm_coords[2], lost_track])
+                    #print( left_hand_3D_pose[joint.value][-1])
                     
                 elif listtype == "RIGHTHAND":
+                    if joint.value == 80:
+                        print(arm_coords)
+                        print("NEW VAL", [arm_coords[0],arm_coords[1],arm_coords[2], lost_track])
                     right_hand_3D_pose[joint.value].append([arm_coords[0],arm_coords[1],arm_coords[2], lost_track])
                     
+                    if joint.value == 8:
+                        print(right_hand_3D_pose[joint.value])
+                        print(HAND(joint.value), joint.value)
+                        print(" ")
+                        #print(i)
+                        #i = i+1
+                        
+                
+                
     #Close Depth image window (if open), and return 3D joint position lists                
     cv2.destroyAllWindows()
+    
+    #print(body_3D_pose)
+    #print(left_hand_3D_pose)
+    #print(right_hand_3D_pose)
     
     return body_3D_pose, left_hand_3D_pose, right_hand_3D_pose
      
@@ -360,6 +394,19 @@ if __name__ == '__main__':
     #Load an example file
     body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('stationarytrial3.17.3.9.43', show_each_frame =  False)
     
+
+    
+    """
+    for pose_list in body_3D_pose, left_hand_3D_pose, right_hand_3D_pose:
+        
+        i = 0
+        
+        #Iterate over each tracked point on the list
+        for joint in pose_list:
+           print(joint)
+           """
+    
+    """
     #Print some values from it
     print(body_3D_pose[BODY.RIGHT_ELBOW.value])
     
@@ -380,5 +427,5 @@ if __name__ == '__main__':
     ax = Axes3D(fig)
     ax.scatter(x_sec, y_sec, z_sec)
     plt.show()
-
+    """
 
