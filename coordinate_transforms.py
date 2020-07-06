@@ -1,143 +1,66 @@
-"""Program to convert camera coords to word coords in the new camera position from 14/02/20, hand tuned as precise as possible"""
-
+"""
+Program to convert camera coords to word coords in the new camera position from 14/02/20, hand tuned as precise as possible
+"""
 import numpy as np
-import cv2
-import ctypes
-
-from pykinect2 import PyKinectV2
-from pykinect2.PyKinectV2 import *
-from pykinect2 import PyKinectRuntime
 
 
 def convert_2_world(x,y,z):
-    """Convert Camera coordinates to world coordinates"""  
+    """Convert Camera coordinates to world coordinates (i.e. x, y and z aligned to the work surface)
+    Note that this functiono built off the output of the matlab camera calibration tool which turned out to be inaccurate, 
+    hence the two seperate definitions of the rotations and translations required"""  
     
-    #Convert to matrix
+    #Convert input coords to numpy matrix
     input_coords = np.matrix([[x,y,z]])
     
-    #Rotation matrix obtained from matlab camera claibration tool (one axis is way off for some reason)
+    #Rotation matrix obtained from matlab camera calibration tool (one axis is way off because the tool isnt working correctly - I suspect my A3 calibration grids are too small)
     rotation_matrix = np.matrix([[-0.9978,   -0.0316,   -0.0577],[-0.0007,   -0.8722,    0.4891],[-0.0658,    0.4881,    0.8703]])
-    
-    #Define an x axis rotation to get the x and y axes in the correct directions, because matlab got them wrong for some reason (hand tuned)
-    a = np.radians(-77.85-0.2)
-    rotx = np.matrix([[1,0,0],[0,   np.cos(a),    -np.sin(a)],[0, np.sin(a), np.cos(a)]])
-    b = np.radians(-1)
-    #b =0
-    roty = np.matrix([[np.cos(b), 0, np.sin(b)],[0,1,0],[-np.sin(b), 0, np.cos(b)]])
-    c = np.radians(-3.9)
-    
-    """
-    a = np.radians(-77.85-0.3)
-    rotx = np.matrix([[1,0,0],[0,   np.cos(a),    -np.sin(a)],[0, np.sin(a), np.cos(a)]])
-    b = np.radians(-1)
-    #b =0
-    roty = np.matrix([[np.cos(b), 0, np.sin(b)],[0,1,0],[-np.sin(b), 0, np.cos(b)]])
-    c = np.radians(-3.9)
-    """
-    #c =0
-    rotz = np.matrix([[np.cos(c),-np.sin(c),0],[np.sin(c), np.cos(c),0],[0,0,1]])
     inv_rotation_matrix = rotation_matrix.getI()
     
-    #Translation vector from matlab (also to wrong position, included just because)
+    #Define hand tunded rotations in each axis to correct the error in the matlab camera calibration tool's output
+    a = np.radians(-77.85-0.2)
+    rotx = np.matrix([[1,0,0],[0,   np.cos(a),    -np.sin(a)],[0, np.sin(a), np.cos(a)]])
+    
+    b = np.radians(-1)
+    roty = np.matrix([[np.cos(b), 0, np.sin(b)],[0,1,0],[-np.sin(b), 0, np.cos(b)]])
+    
+    c = np.radians(-3.9)
+    rotz = np.matrix([[np.cos(c),-np.sin(c),0],[np.sin(c), np.cos(c),0],[0,0,1]])
+    
+    #Translation vector from matlab (also contains error)
     translation_vector = np.matrix([[0.2566,   -0.4042,   -1.1052]])
     
     #Carry out the coordinate transform the way matlab suggests
     shifted_vector = input_coords - translation_vector
     world_coords = shifted_vector*inv_rotation_matrix
     
-    #Apply my manual rotation about the x axis to correct the bad y and z axis direction in matlab
+    #Apply my manual rotation about the x,, y and z axes to correct the errors from the matlab camera calibration tool
     world_coords = world_coords*rotx
     world_coords = world_coords*roty
     world_coords = world_coords*rotz
     
-    #Define a new vector to get us to where we want the origin to be
+    #Hand tune a new vector to correct for errors in the matlab translation vector
     fine_tune = np.matrix([[0.31608206594757293, -1.1510445103398879, 1.8711518386598227]])
     world_coords = world_coords - fine_tune
+    
+    #Reverse the orientation of some axes so that they are aligned in the correct direction
     world_coords = np.matrix([[world_coords.item(0),-world_coords.item(1), -world_coords.item(2)]])
+    
     return world_coords
 
 
 def convert_to_arm_coords(x_input, y_input, z_input):
-    """Convert from world coordinates to arm coordinates"""
+    """Convert from camera coordinates to arm coordinates (the coordinate system of the UR5)"""
     
+    #Change input from camera coordates to the world coordinate system
     board_coords = convert_2_world(x_input, y_input, z_input)
     
-    #measure distance from checkboard origin to arm origin
+    #define distance from checkboard (i.e. world) origin to arm origin
     board_to_arm_translation = np.matrix([[0.09,-0.475,-0.018]])
     
-    #Add some adition fine tuning parameters
-    fine_tune_2 = np.matrix([[-0.055, 0.01, 0.018]])
+    #Add an additional fine tuning translation vector
+    fine_tune = np.matrix([[-0.055, 0.01, 0.018]])
     
     #Move origin to the arm's origin
-    arm_coords = board_coords + board_to_arm_translation + fine_tune_2
+    arm_coords = board_coords + board_to_arm_translation + fine_tune
 
     return [arm_coords.item(0), arm_coords.item(1), arm_coords.item(2)]
-    
-
-if __name__ == '__main__': 
-    """Code to check that the functions above return axes in the correct locations"""
-    
-    #Defins required to extract depth
-    kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Color |PyKinectV2.FrameSourceTypes_Depth)
-    color2depth_points_type = _DepthSpacePoint* np.int(1920 * 1080)
-    color2depth_points = ctypes.cast(color2depth_points_type(), ctypes.POINTER(_DepthSpacePoint))
-    S = 1080*1920
-    TYPE_CameraSpacePointArray = PyKinectV2._CameraSpacePoint * S
-    csps1 = TYPE_CameraSpacePointArray()
-    
-    while True:
-        # --- Getting frames and drawing
-        if kinect.has_new_depth_frame():
-            
-            #Collect live colour and depth data
-            frame = kinect.get_last_depth_frame()
-            frameD = kinect._depth_frame_data        
-            frame = frame.astype(np.uint8)
-            frame = np.reshape(frame, (424, 512))
-            
-            colourframe = kinect.get_last_color_frame()
-            colourframeD = kinect._color_frame_data
-            
-            #Reslice the colour frame to remove every 4th value, which is superfluous
-            colourframe = np.reshape(colourframe, (2073600, 4))
-            colourframe = colourframe[:,0:3] #exclude superfluos values
-            
-            #extract then combine the RBG data
-            colourframeR = colourframe[:,0]
-            colourframeR = np.reshape(colourframeR, (1080, 1920))
-            colourframeG = colourframe[:,1]
-            colourframeG = np.reshape(colourframeG, (1080, 1920))        
-            colourframeB = colourframe[:,2]
-            colourframeB = np.reshape(colourframeB, (1080, 1920))
-            framefullcolour = cv2.merge([colourframeR, colourframeG, colourframeB])
-                
-            #Show colour frames as they are recorded, left click to get the 3D location of a colour pixel in world coords
-            def click_event(event, x, y, flags, param):
-                if event == cv2.EVENT_LBUTTONDOWN:
-                    
-                    #Defines to do colour to camera coords transformation
-                    L = frame.size
-                    ctypes_depth_frame = frameD
-                    kinect._mapper.MapColorFrameToDepthSpace(ctypes.c_uint(512 * 424), ctypes_depth_frame, ctypes.c_uint(1920 * 1080), color2depth_points)
-                    kinect._mapper.MapColorFrameToCameraSpace(L, ctypes_depth_frame, S, csps1)
-                    
-                    #Get position in camera coords
-                    x_3D = csps1[y*1920 + x].x
-                    y_3D = csps1[y*1920 + x].y
-                    z_3D = csps1[y*1920 + x].z
-                    
-                    #Convert to arm coords
-                    arm_coords = convert_to_arm_coords(x_3D, y_3D, z_3D)
-    
-                    print("arm pos is", arm_coords[0], arm_coords[1], arm_coords[2])
-            
-            #Display imagem define what a click means
-            cv2.imshow('KINECT Video Stream', framefullcolour)
-            cv2.setMouseCallback('KINECT Video Stream', click_event)
-            output = None
-            
-        #Close withdow if escape is pressed
-        key = cv2.waitKey(1)
-        if key == 27: break
-    cv2.destroyAllWindows()
-

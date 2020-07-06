@@ -12,9 +12,11 @@ import glob
 import os
 from enum import Enum
 import math
+
 from pykinect2 import PyKinectV2
 from pykinect2.PyKinectV2 import *
 from pykinect2 import PyKinectRuntime
+
 from coordinate_transforms import convert_to_arm_coords
 
 parentDirectory = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
@@ -131,7 +133,56 @@ def track_body(folder):
         frame_num +=1
     return body_2D_pose, left_hand_2D_pose, right_hand_2D_pose
    
+
+def filter_out_invalid(pos, threshold):
+    """Function to mark clealy invalid points as bad"""
     
+    #initialise armpos (will be overwritten later if point is good)
+    armpos = [-3,-3,-3]
+    
+    #Say we havent lost track if the confidence value in the joint position is over a certain threshold
+    if pos[2] > threshold:
+        lost = False
+        
+    else:
+        lost = True
+      
+    #Catch the joint position we returned when openpose cant see a skeleton
+    if pos == [-1,-1,-1]:
+        lost = True
+
+    #Catch the position openpose sometimes fills its first JSON message with
+    if pos == [0,0,0]: 
+        lost = True
+    
+    #Catch any other invalid points - this may be redundant given previous filtering stages, but the effect of removing this has not been extensively tested
+    if math.isinf(pos[0]) == True: 
+        armpos = [0,0,0.1]
+        lost = True
+
+    if math.isinf(pos[1]) == True:  
+        armpos = [0,0,0.2]
+        lost = True
+
+    if math.isinf(pos[2]) == True:
+        armpos = [0,0,0.3]
+        lost = True
+
+    if math.isnan(pos[0]) == True:
+        armpos = [0,0,0.4]
+        lost = True
+
+    if math.isnan(pos[1]) == True:
+        armpos = [0,0,0.5]
+        lost = True
+
+    if math.isnan(pos[2]) == True:
+        armpos = [0,0,0.6]
+        lost = True
+    
+    return armpos, lost
+    
+
 def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame = False, cropdatato01 = False):
     """Takes saved 2D arm coordinates from track_body and turns them into list of 3D arm coordinates
     NEEDS TO HAVE A KINECT OR RUNNING KINECT STUDIO RECORDING CONNECTED WHEN THIS PROGRAM IS RUN, because of requirements from PyKinect2"""
@@ -221,46 +272,9 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                 #Read 2D joint position
                 position = raw_coords_list[joint.value][framenum]
                 
-                #Say we havent lost track if the confidence value in the joint position is over a certain threshold
-                if position[2] > confidence_threshold:
-                    lost_track = False
-                    
-                else:
-                    lost_track = True
-                  
-                #Catch the joint position we returned when openpose cant see a skeleton
-                if position == [-1,-1,-1]:
-                    lost_track = True
-
-                #Catch the position openpose sometimes fills its first JSON message with
-                if position == [0,0,0]: 
-                    lost_track = True
+                #Filter out invalid points
+                arm_coords, lost_track = filter_out_invalid(position, confidence_threshold)
                 
-                #Catch any other invalid points - this may be redundant given previous filtering stages, but the effect of removing this has not been extensively tested
-                if math.isinf(position[0]) == True: 
-                    arm_coords = [0,0,0.1]
-                    lost_track = True
-
-                if math.isinf(position[1]) == True:  
-                    arm_coords = [0,0,0.2]
-                    lost_track = True
-
-                if math.isinf(position[2]) == True:
-                    arm_coords = [0,0,0.3]
-                    lost_track = True
-
-                if math.isnan(position[0]) == True:
-                    arm_coords = [0,0,0.4]
-                    lost_track = True
-
-                if math.isnan(position[1]) == True:
-                    arm_coords = [0,0,0.5]
-                    lost_track = True
-
-                if math.isnan(position[2]) == True:
-                    arm_coords = [0,0,0.6]
-                    lost_track = True
-
                 if lost_track == False:
                     
                     #Include option to crop data points that are over 1m away to allow for better depth visualisation in later code
