@@ -182,8 +182,55 @@ def filter_out_invalid(pos, threshold):
     
     return armpos, lost
     
+def display_joints(x,y, lost_track, color2depth_points, frame):
+    """Function to display the position of the tracked joints"""
+    
+    try:
+                            
+        #depth image 2D x and y in pixels, and deoth inage depth of a specific pixel using Colour_to_depth method - useful for displaying joint positions on a 2D image, NOT FOR FINDING 3D JOINT POSITIONS
+        read_pos = x+y*1920 -1
+        x_pixels = int(color2depth_points[read_pos].x)
+        y_pixels = int(color2depth_points[read_pos].y)
+        
+    except OverflowError:
+        
+        #Say joint is in the corner when you cant see it
+        x_pixels = 1
+        y_pixels = 1 
+    
+    #Highlight the 2D joint positions on the depth image 
+    if lost_track == False:
+        cv2.circle(frame, (x_pixels,y_pixels), 5, (255, 0, 255), -1)    
+    
+    else:
+        #Draw a joint in the corner of the screen if its recorded as bad
+        cv2.circle(frame, (0,0), 25, (200, 0, 200), -1)
+    
+    #Display annotated depth image 
+    cv2.imshow('KINECT Video Stream', frame)
+    key = cv2.waitKey(1)
+    if key == 27: 
+        pass
+    
+def get_tracked_class(raw_coords_sample, body_2D_sample, left_hand_2D_sample, right_hand_2D_sample):
+    """Function to define what kind of list we are iterating over in get_arm_3D_coordinates"""
+    
+    if raw_coords_sample == body_2D_sample:
+        tracked_class = BODY
+        listtype = "BODY"
+        
+    elif raw_coords_sample == left_hand_2D_sample:
+        tracked_class = HAND
+        listtype = "LEFTHAND"
+        
+    elif raw_coords_sample == right_hand_2D_sample:
+        tracked_class = HAND
+        listtype = "RIGHTHAND"
+        
+    return tracked_class, listtype
+    
 
-def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame = False, cropdatato01 = False):
+def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame = False):
     """Takes saved 2D arm coordinates from track_body and turns them into list of 3D arm coordinates
     NEEDS TO HAVE A KINECT OR RUNNING KINECT STUDIO RECORDING CONNECTED WHEN THIS PROGRAM IS RUN, because of requirements from PyKinect2"""
     
@@ -210,9 +257,6 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
     
     #Defined where aved depth data is stored
     depthdatafile = open("bin/rawdata/DEPTH." + filename + ".pickle", "rb")
-    
-    #close any opencv windows that were previously open, so you dont end up with a huge number of tabs when you run this file repeatedly
-    cv2.destroyAllWindows()
     
     #Check number of joints to track
     body_tracked_joints_num = 0
@@ -254,17 +298,7 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
         for raw_coords_list in body_2D_pose, left_hand_2D_pose, right_hand_2D_pose:
             
             #Define the type of list we are iterating over
-            if raw_coords_list[5] == body_2D_pose[5]:
-                tracked_class = BODY
-                listtype = "BODY"
-                
-            elif raw_coords_list[5] == left_hand_2D_pose[5]:
-                tracked_class = HAND
-                listtype = "LEFTHAND"
-                
-            elif raw_coords_list[5] == right_hand_2D_pose[5]:
-                tracked_class = HAND
-                listtype = "RIGHTHAND"
+            tracked_class, listtype = get_tracked_class(raw_coords_list[5], body_2D_pose[5], left_hand_2D_pose[5], right_hand_2D_pose[5])
             
             #Iterate over each joint
             for joint in tracked_class:
@@ -277,20 +311,6 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                 
                 if lost_track == False:
                     
-                    #Include option to crop data points that are over 1m away to allow for better depth visualisation in later code
-                    if cropdatato01 == True:
-                        if position[0]>1 :
-                            position[0] = 1-1/1920         
-     
-                        if position[0]<0 :
-                            position[0] = 0    
-                            
-                        if position[1]>1 :
-                            position[1] = 1-1/1920         
-     
-                        if position[1]<0 :
-                            position[1] = 0  
-
                     #find x and y in pixel (not normalised pixel) position in the 2D image
                     x = int(position[0]*1920)
                     y = int(position[1]*1080)
@@ -312,39 +332,12 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                     
                     #Code for visualising where the tracked joints are in the depth image
                     if show_each_frame == True:
-                        try:
                         
-                            #depth image 2D x and y in pixels, and deoth inage depth of a specific pixel using Colour_to_depth method - useful for displaying joint positions on a 2D image, NOT FOR FINDING 3D JOINT POSITIONS
-                            read_pos = x+y*1920 -1
-                            x_pixels = int(color2depth_points[read_pos].x)
-                            y_pixels = int(color2depth_points[read_pos].y)
-                            
-                        except OverflowError:
-                            
-                            #Say joint is in the corner when you cant see it
-                            x_pixels = 1
-                            y_pixels = 1 
-                    
-                        #Highlight the 2D joint positions on the depth image 
-                        if lost_track == False:
-                            cv2.circle(frame, (x_pixels,y_pixels), 5, (255, 0, 255), -1)
+                        display_joints(x,y, lost_track, color2depth_points, frame)
 
                 if lost_track == True:
-                    
                     #Set arm coords to -1 to show that they are in error
                     arm_coords = [-1,-1,-1]
-                    
-                    if show_each_frame == True:
-                        
-                        #draw a big circle if we cant see the joint (will probably end up in the corner of the image)
-                        cv2.circle(frame, (0,0), 25, (200, 0, 200), -1)
-
-                #Display annotated depth image if flag is set
-                if show_each_frame == True:
-                    cv2.imshow('KINECT Video Stream', frame)
-                    key = cv2.waitKey(1)
-                    if key == 27: 
-                        pass
                 
                 #Add 3D joint positions, and whether we classify that joint as lost, in the approproate list
                 if listtype == "BODY":
@@ -358,10 +351,10 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                     
     #Close Depth image window (if open), and return 3D joint position lists                
     cv2.destroyAllWindows()
+    
     return body_3D_pose, left_hand_3D_pose, right_hand_3D_pose
      
     
-
 if __name__ == '__main__': 
 
     #Load an example file
