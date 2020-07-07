@@ -1,24 +1,23 @@
 """
 display smoothed data from a single demonstration
 """
-
 import numpy as np
 import time
 from scipy import signal
 import pickle
 import sys
 import math
-from get_3D_pose import HAND, BODY, get_arm_3D_coordinates
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.cm as cm
 
-from scipy import signal
-import numpy as np
+from get_3D_pose import HAND, BODY, get_arm_3D_coordinates
+
 
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
     return vector / np.linalg.norm(vector)
+
 
 def angle_between(v1, v2):
     """ Returns the angle in radians between vectors 'v1' and 'v2'::
@@ -30,16 +29,22 @@ def angle_between(v1, v2):
             >>> angle_between((1, 0, 0), (-1, 0, 0))
             3.141592653589793
     """
+    
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
+    
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
 
 def plot_vertical_line(plot, xval):
     """draw a vertical line on plot at xval"""
+    
     plot.plot([xval*10, xval*10], [-180,180], linestyle = ':')
+
 
 def plot_key_times(plot, ypos, times_dict, yscale = 0.05):
     """Plot vertical lines at the defined key time points"""
+    
     lines_list = []
     
     for val in sorted(times_dict.values()):
@@ -158,16 +163,7 @@ y_lower_limit = -0.25
 z_upper_limit = 0.5
 z_lower_limit = -0.5
 
-"""
-x_upper_limit = 3
-x_lower_limit = -3
 
-y_upper_limit = 3
-y_lower_limit = -3
-
-z_upper_limit = 3
-z_lower_limit = -3
-"""
 #Track start time
 old_time = time.time()
 #
