@@ -57,7 +57,7 @@ def get_plot_list(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose):
                 results_list[frame_num].append([[x1,x2], [y1,y2], [z1,z2], lost_track])
                 
             else:
-                if joint ==HAND.THUMB_JOINT_1:
+                if joint ==HAND.PALM:
                     wrist_list.append(hand_pose[joint.value][frame_num])
                 x1 = hand_pose[joint.value][frame_num][0]
                 x2 = hand_pose[joint.value-1][frame_num][0]
