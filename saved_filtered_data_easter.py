@@ -1,24 +1,21 @@
-# -*- coding: utf-8 -*-
 """
 Code to filter and save the raw pose trajectories extracted from recordings in a format suitable for the animation code
 """
-
 import numpy as np
 import time
 from scipy import signal
 import pickle
 import sys
 import math
+
 from get_3D_pose import HAND, BODY, get_arm_3D_coordinates
 
 
-
-
 def savgol_filter(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose, threshold = 0.2):
-     #print(range(len(body_3D_pose[0])))
+    """Code to apply a savgol filter to the recorded body pose"""
      
+    #Define properties of the savgol filter
      window_length, polyorder = 11, 2
-     
      
      too_big_distance_list = []
      for hand_pose in right_hand_3D_pose, left_hand_3D_pose:

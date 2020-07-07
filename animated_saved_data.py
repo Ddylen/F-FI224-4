@@ -1,7 +1,6 @@
 """
 code to animate the recorded skeleton (assumes other files have already been run to process the data)
 """
-
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,55 +9,42 @@ import mpl_toolkits.mplot3d as plt3d
 import matplotlib.animation as animation
 
 
-
 def update_lines(frame_num, RESULTS_LIST, lines, time_text):
+    """Function to update the drawn lines in the animation"""
+    
+    #Flag to state whether you should display data points flagged as false
     showfalse = True
-    #print(time.time())
+    
     i = 0
+    
     for line in lines:
-        #print(results_list[frame_num][i])
-        #print("I IS", i)
-        #print(line)
+
         x = np.asarray(RESULTS_LIST[frame_num][i][0])
-        #print('x', x)
-        #print(type(x))
-        #print(" ")
+
         y = np.asarray(RESULTS_LIST[frame_num][i][1])
-        #print('y', y)
-        #print(" ")
+
         z = np.asarray(RESULTS_LIST[frame_num][i][2])
-        #print('z', z)
-        #print(" ")
-        
-        #print(" ")
         
         if RESULTS_LIST[frame_num][i][3] == False:
 
             line.set_color('b')
   
         elif  RESULTS_LIST[frame_num][i][3] == True:
-            #print(type(line))
-            #pass
-            line.set_color('r')
-            
 
+            line.set_color('r')
             
             if showfalse == True:
                 x = np.asarray(RESULTS_LIST[frame_num][i][0])
-                #print('x', x)
-                #print(type(x))
-                #print(" ")
+
                 y = np.asarray(RESULTS_LIST[frame_num][i][1])
-                #print('y', y)
-                #print(" ")
+
                 z = np.asarray(RESULTS_LIST[frame_num][i][2])
-            #if i == 47:
             
             if showfalse == False:
                 x = np.asarray([0,0])
                 y = np.asarray([0,0])
                 z = np.asarray([0,0])
-            #print(frame_num, [results_list[frame_num][i]])
+
         line.set_data(x,y)
         line.set_3d_properties(z)
         i = i+1
@@ -69,29 +55,13 @@ def update_lines(frame_num, RESULTS_LIST, lines, time_text):
     return lines
 
 
-
-
-
-
 def animate(file_name):
     readfile = open("bin/filtered_data/" + file_name + ".pickle", "rb")
     loaded_results = pickle.load(readfile)
     
-    
-    
     # Attaching 3D axis to the figure
     fig = plt.figure()
     ax = p3.Axes3D(fig)
-    """
-    x_upper_limit = 1
-    x_lower_limit = -1
-    
-    y_upper_limit = 1
-    y_lower_limit = -1
-    
-    z_upper_limit = 1
-    z_lower_limit = -1
-    """
     
     x_upper_limit = 1
     x_lower_limit = 0
@@ -110,15 +80,7 @@ def animate(file_name):
     
     ax.set_zlabel('Z')
     
-    
-    
-    
-    
-    
     lines = [ax.plot(l[0], l[1], l[2])[0] for l in loaded_results[1]]
-    
-    
-    
     
     # Setting the axes properties
     #ax.set_xlim3d([x_lower_limit, x_upper_limit])
