@@ -155,9 +155,11 @@ if __name__ == '__main__':
     #file_name = '2.7.16.27'
     #file_name = 'stationarytrial1.17.3.9.38'   #36s, hand on oil botle cap, nothing beneath it (dot on wrist close to shirt)
     #file_name = 'stationarytrial2.17.3.9.41'   #65s, hand on plate on salt tube (dot on shirt sleeve)
-    file_name = 'stationarytrial3.17.3.9.43'   #4s, very short, hand on salt shaker, dot on shirt
+    #file_name = 'stationarytrial3.17.3.9.43'   #4s, very short, hand on salt shaker, dot on shirt
     #file_name = 'stationaytrial4.17.3.9.43'    #38s, hand on salt sharker (dot on shirt)
     #file_name = 'stationaytrial5.17.3.9.44'    #50s, hand on table (dot on shirt)
+    
+    file_name = 'trial1dylan.12.3.16.31'
     
     #Get trajectory in arm coordinates
     BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE = get_arm_3D_coordinates(file_name, confidence_threshold = 0)

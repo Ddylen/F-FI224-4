@@ -143,7 +143,7 @@ def pour_ingredients(robo):
     #grab cup 1, and pour it
     grab_item(robo, cup_1_location, cup_orientation, angle = 55)
     
-    robo.teach_mode.play("pourcup1203201.json")
+    robo.teach_mode.play("JSON/pourcup1203201.json")
     
     #release cup one as the previous leaves it in roughly the correct position
     robo.open_hand()
@@ -153,7 +153,7 @@ def pour_ingredients(robo):
     
     #grab cup 2 and pour it
     grab_item(robo, cup_2_location, cup_orientation, angle = 55)
-    robo.teach_mode.play("pourcuptt9320.json")
+    robo.teach_mode.play("JSON/pourcuptt9320.json")
   
     #release cup 2 as the previous leaves it in roughly the correct position
     robo.open_hand()
@@ -212,10 +212,10 @@ def pour_batter(robo, cookingtime1, startingtime):
     grab_item(robo, ladel_location, y_orientation, angle = 80, old = True)
     
     #scoop the batter, leaving the ladle over the bowl
-    robo.teach_mode.play_fast("scoop93201.json", speedup = 3)
+    robo.teach_mode.play_fast("JSON/scoop93201.json", speedup = 3)
     
     #pour the batter into the pan
-    robo.teach_mode.play("pour93201.json")
+    robo.teach_mode.play("JSON/pour93201.json")
     
     #return the ladle
     drop_item(robo, ladel_location, y_orientation)
@@ -237,11 +237,11 @@ def flip_pancakes(robo, cookingtime2, startingtime):
     grab_item(robo, spatula_location, spatula_orientation)
     
     #Pick up the pancake and hold it above the pan
-    robo.teach_mode.play("pick163201.json")
+    robo.teach_mode.play("JSON/pick163201.json")
     
     #Move to a reference position slowly (nominally where the last action ends, then flip the pancake)
     robo.movej([np.radians(-20), np.radians(-111), np.radians(-93), np.radians(-87), np.radians(83), np.radians(99)], min_time = 2)
-    robo.teach_mode.play("flip93202.json")    
+    robo.teach_mode.play("JSON/flip93202.json")    
     
     #Sleep so that the other side of the pancake cooks for an appropriate amount of time
     cook2_time_in_flip =13
@@ -259,7 +259,7 @@ def remove_pancakes(robo, startingtime):
     robo.movej([np.radians(-16), np.radians(-106), np.radians(-96), np.radians(-85), np.radians(86), np.radians(113)], min_time = 2)
     
     #Attempt to pick up and serve pancakes
-    robo.teach_mode.play("pickup93202.json") 
+    robo.teach_mode.play("JSON/pickup93202.json") 
     
     #Move spatula back to the tool holder location and replace it
     robo.movej([np.radians(-54), np.radians(-113), np.radians(-69), np.radians(-111), np.radians(93), np.radians(69)], min_time = 4)

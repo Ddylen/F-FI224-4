@@ -235,9 +235,7 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
     NEEDS TO HAVE A KINECT OR RUNNING KINECT STUDIO RECORDING CONNECTED WHEN THIS PROGRAM IS RUN, because of requirements from PyKinect2"""
     
     print("calculating 3D pose in arm coordinates")
-    
-    i = 0
-    
+        
     #keep a could of how many conversion fail - a high number could suggest that no kinect/ running kinectstudio recording is present
     convert_to_am_coords_bad_count = 0
     
@@ -313,6 +311,20 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
                 
                 if lost_track == False:
                     
+                    #if openpose generates a joint position (generally just) outside the FoV of the camera, crop it to the last position we can actually see
+                    if position[0]>1 :
+                        position[0] = 1-1/1920         
+ 
+                    if position[0]<0 :
+                        position[0] = 0    
+                        
+                    if position[1]>1 :
+                        position[1] = 1-1/1920         
+ 
+                    if position[1]<0 :
+                        position[1] = 0  
+                        
+                        
                     #find x and y in pixel (not normalised pixel) position in the 2D image
                     x = int(position[0]*1920)
                     y = int(position[1]*1080)
@@ -366,7 +378,7 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
 if __name__ == '__main__': 
 
     #Load an example file
-    body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('stationarytrial3.17.3.9.43', show_each_frame =  False)
+    body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('trial1dylan.12.3.16.31', show_each_frame =  False)
 
     #Print some values from it
     print(body_3D_pose[BODY.RIGHT_ELBOW.value])
