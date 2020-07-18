@@ -452,13 +452,10 @@ if __name__ == '__main__':
     
     #Defimne the relevant file name
     
-    #file_name =  '1.23.17.49'
-    #file_name = '1.24.21.46'
-    #file_name = '1.24.22.0'
-    #file_name = '1.24.21.39'
-    #file_name = 'mockcook.14.2.17.36'
+    #file_name = 'stationaytrial5.17.3.9.44'
     #file_name = 'trial6dylan.16.3.9.50'
-    file_name = 'trial7thomas.16.3.10.24'
+    #file_name = 'trial7thomas.16.3.10.24'
+    file_name = 'test9keiran.17.3.11.40'
     
     #Find if file has already been processed to extract the pose lists
     try:
