@@ -168,11 +168,11 @@ if __name__ == '__main__':
     results_list, wrist_list = get_unfiltered_data(BODY3DPOSE, LEFTHAND3DPOSE,RIGHTHAND3DPOSE)
     
     #Save unfiltered data 
-    datafile = open("bin/filtered_data/" + file_name + ".pickle", "wb")
+    datafile = open("bin/filtered_data/UNFILTERED" + file_name + ".pickle", "wb")
     pickle.dump(results_list, datafile)
     
     #Save unfiltered wrist data
-    wristdatafile = open("bin/filtered_data/wrist." + file_name + ".pickle", "wb")
+    wristdatafile = open("bin/filtered_data/UNFILTEREDwrist." + file_name + ".pickle", "wb")
     pickle.dump(wrist_list, wristdatafile)
     
     print("Time taken is", time.time()-old_time)

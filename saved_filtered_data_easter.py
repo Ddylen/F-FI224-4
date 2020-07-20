@@ -10,6 +10,7 @@ import math
 
 from get_3D_pose import HAND, BODY, get_arm_3D_coordinates
 from animated_saved_data import animate
+from efficient_load import efficient_load
 
 
 def savgol_filter(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose, threshold = 0.2):
@@ -57,30 +58,6 @@ def savgol_filter(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose, threshold 
         body_3D_pose[joint.value] = smoothed_list
 
     return body_3D_pose, left_hand_3D_pose,right_hand_3D_pose
-
-
-def find_last_good_pose(pose_list, frame_num, original_frame_num):
-    """Function to replace an invalid point with a previously seen valid point"""
-    
-    #if previous point is valid
-    if pose_list[frame_num-1][3] == False:
-        
-        #replace current point with previous position
-        returned_frame = frame_num-1
-        found_a_good_point = True
-        last_good_pose = pose_list[returned_frame]
-    else:
-        if frame_num == 0:
-            #print("Found no good past points")
-            last_good_pose = pose_list[original_frame_num]
-            found_a_good_point = False
-            returned_frame = original_frame_num
-            return last_good_pose, returned_frame, found_a_good_point
-        else:
-
-            last_good_pose, returned_frame, found_a_good_point = find_last_good_pose(pose_list, frame_num -1, original_frame_num)
-    return last_good_pose, returned_frame, found_a_good_point
-  
     
 def check_out_of_bounds(position, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, zmin = -0.5, zmax = 1.5):
     """Function to check a point is in the volume we have defined as valid"""
@@ -109,24 +86,14 @@ def filter_out_jumps(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose, thresho
     for pose_list in body_3D_pose, left_hand_3D_pose, right_hand_3D_pose:
         for sublist in pose_list:
             sublist[0] = sublist[1]
-            
-    #DEL - single out a joint for further analysis/ processing
-    tracked_joint = BODY.PELVIS
-    tracked_joint_list = []
     
-    #DEL - define a list of moving averages for each joint
-    movingav = [[0,0,0,0]]*len(body_3D_pose[0])
-    movingav = [movingav]*len(right_hand_3D_pose)
+    #Threshold, moving over this in a single frame marks a point as invalid
+    move_distance_threshold = 0.1
     
     #Create lists of the last good points seen for each joint
     last_good_point_list_right =  [[0,0,0,False]]*len(right_hand_3D_pose)
     last_good_point_list_left =  [[0,0,0,False]]*len(left_hand_3D_pose)    
     last_good_point_list_body =  [[0,0,0,False]]*len(body_3D_pose)
-    
-    #set a flag if we should track on join individually for debugging purposes
-    special_joint = HAND.INDEX_KNUCKLE
-    special_hand = "RIGHT"
-    track_special_joint = True
     
     #Iterating over each frame
     for frame_num in range(len(body_3D_pose[0])):
@@ -160,71 +127,23 @@ def filter_out_jumps(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose, thresho
                            last_good_hand_pose= last_good_point_list_left[joint.value]
                            last_good_point_list_right[joint.value][3] = False
                        
-                       #If wrist position is bad also set hand joint position as bad (as hand joint values will be stored in a relative-to-wrist position format)
+                       #If wrist position is bad also set hand joint position as bad
                        if  body_3D_pose[wristval][frame_num][3] == True:
                            hand_pose[joint.value][frame_num][3] = True
                            
                        #If hand position is out the the expected box say hand position is bad
                        if check_out_of_bounds(hand_pose[joint.value][frame_num]) == True:
                            hand_pose[joint.value][frame_num][3] = True
-                           
-                       #Define hand joint positions relative to the wrist
-                       hand_pose[joint.value][frame_num][0] = hand_pose[joint.value][frame_num][0] - body_3D_pose[wristval][frame_num][0]
-                       hand_pose[joint.value][frame_num][1] = hand_pose[joint.value][frame_num][1] - body_3D_pose[wristval][frame_num][1]
-                       hand_pose[joint.value][frame_num][2] = hand_pose[joint.value][frame_num][2] - body_3D_pose[wristval][frame_num][2]
-                      
-                       #Define distance from last good position    
-                       move_distance = np.sqrt((hand_pose[joint.value][frame_num][0] - hand_pose[joint.value][frame_num-1][0])**2+(hand_pose[joint.value][frame_num][1]-hand_pose[joint.value][frame_num-1][1])**2 + (hand_pose[joint.value][frame_num][2]-hand_pose[joint.value][frame_num-1][2])**2)
                        
-                       #Define distance from the moving average
-                       #av_distance = np.sqrt((hand_pose[joint.value][frame_num][0] - movingav[joint.value][frame_num][0])**2+(hand_pose[joint.value][frame_num][1]-movingav[joint.value][frame_num][1])**2 + (hand_pose[joint.value][frame_num][2]-movingav[joint.value][frame_num][2])**2)
+                       #Define distance from last position    
+                       move_distance = np.linalg.norm([hand_pose[joint.value][frame_num][0] - hand_pose[joint.value][frame_num-1][0], hand_pose[joint.value][frame_num][1]-hand_pose[joint.value][frame_num-1][1], hand_pose[joint.value][frame_num][2]-hand_pose[joint.value][frame_num-1][2]])
                        
-                       #Define distance from wrist
-                       wrist_distance = np.sqrt((hand_pose[joint.value][frame_num][0])**2+(hand_pose[joint.value][frame_num][1])**2 + (hand_pose[joint.value][frame_num][2])**2)
-                       
-                       #Debugging statements
-                       if track_special_joint == True and joint == special_joint and hand == special_hand:
-                           #print("Current:  ", hand_pose[joint.value][frame_num])
-                           #print("Last Good:", last_good_point_list_right[joint.value])
-                           pass
-                           
                        #If hand moves too far or hand position is too far from wrist, replace position with last measured good position
-                       if move_distance > 0.2:
-                           
-                           #Set hand pose to last good hand pose
-                           hand_pose[joint.value][frame_num] = last_good_hand_pose
+                       if move_distance > move_distance_threshold:
                            
                            #Set that position was bad so it comes up in red in the animation
                            hand_pose[joint.value][frame_num][3] = True  
-                           
-                           #Debugging statements
-                           if track_special_joint == True and joint == special_joint and hand == special_hand:
-                               #print("Point Bad/ Move")
-                               pass
-                       
-                       #If hand joint is too far from the wrist, mark is as bad and replace it with the last good position
-                       if wrist_distance > 0.2:
-                           
-                           #Set hand pose to last good hand pose
-                           hand_pose[joint.value][frame_num] = last_good_hand_pose
-                           
-                           #Set that position was bad so it comes up in red in the animation
-                           hand_pose[joint.value][frame_num][3] = True
 
-                           #Debugging statment
-                           if track_special_joint == True and joint == special_joint and hand == special_hand:
-                               #print("Point Bad/ Wrist")   
-                               pass
-                               
-                       #Debugging statement
-                       if track_special_joint == True and joint == special_joint and hand == special_hand:
-                           #print("PoseAfter :  ", hand_pose[joint.value][frame_num])
-                           pass
-                           
-                       #Debugging statement
-                       if track_special_joint == True and joint == special_joint and hand == special_hand:
-                           #print(hand_pose[joint.value][frame_num][3], hand_pose[joint.value][frame_num][3] == False )
-                           pass
                        
                        #Update last good right hand pose 
                        if hand == "RIGHT":
@@ -234,12 +153,7 @@ def filter_out_jumps(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose, thresho
                                
                                #Update last good point with the current point
                                last_good_point_list_right[joint.value] = hand_pose[joint.value][frame_num]
-                               
-                               #Debugging statement
-                               if joint == HAND.INDEX_KNUCKLE and hand == "RIGHT":
-                                   #print("Update fired", hand_pose[joint.value][frame_num])
-                                   pass
-                                   
+                             
                        #Update last good left hand pose        
                        if hand == "LEFT":
                            
@@ -248,44 +162,374 @@ def filter_out_jumps(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose, thresho
                                
                                #Update last good point with the current point
                                last_good_point_list_left[joint.value] = hand_pose[joint.value][frame_num]
-                       
-                        #Debugging statement
-                       if joint == HAND.INDEX_KNUCKLE and hand == "RIGHT":        
-                           #print("")
-                           pass
-                      
+
+
        #Iterate over each joint in the body
        for joint in BODY:
            
            #Excluding the first frame, which contains no information
            if frame_num != 0:
+               
+               #Check joint lies within the allowable volume
+               if check_out_of_bounds(body_3D_pose[joint.value][frame_num]) == True:
+                           hand_pose[joint.value][frame_num][3] = True
+                           
+               #Define distance from current pose to last pose
+               move_distance = np.linalg.norm([body_3D_pose[joint.value][frame_num][0] - body_3D_pose[joint.value][frame_num-1][0], body_3D_pose[joint.value][frame_num][1]-body_3D_pose[joint.value][frame_num-1][1], body_3D_pose[joint.value][frame_num][2]-body_3D_pose[joint.value][frame_num-1][2]])
+               
 
-               #Find last good pose
-               last_good_body_pose, returned_frame, found_a_good_point = find_last_good_pose(body_3D_pose[joint.value], frame_num, frame_num) 
-               
-               #Define distance from current pose to last good pose
-               move_distance = np.sqrt((body_3D_pose[joint.value][frame_num][0] - last_good_body_pose[0])**2+(body_3D_pose[joint.value][frame_num][1]-last_good_body_pose[1])**2 + (body_3D_pose[joint.value][frame_num][2]-last_good_body_pose[2])**2)
-               
-               #Update current point with last good hand pose
-               body_3D_pose[joint.value][frame_num] = last_good_body_pose
-               
+               #If current joint is good
+               if hand_pose[joint.value][frame_num][3] == False:
+                   
+                   #Update last good point with the current point
+                   last_good_point_list_body[joint.value] = body_3D_pose[joint.value][frame_num]
+                   
+                   
     return body_3D_pose, left_hand_3D_pose,right_hand_3D_pose
- 
+
     
+def check_length_constraints(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose):
+    """Check the points correspond to a realistic skeleton"""
+    
+    #Define constraints on the size of the different parts of the skeleton
+    palm_to_knuckles_max_length = 0.25 
+    palm_to_knuckles_min_length = 0.03
+    
+    finger_interjoint_max_length = 0.07
+    finger_interjoint_min_length = 0.01
+    
+    eye_head_max_length = 0.3
+    eye_head_min_length = 0 
+    
+    max_arm_link_length = 0.35
+    min_arm_link_length = 0.2 
+    
+    max_back_length = 0.8 
+    min_back_length = 0.4 
+    
+    max_neck_length = 0.5
+    min_neck_length = 0
+    
+    max_collar_length = 0.35
+    min_collar_length = 0.15
+    
+    palm_to_wrist_max_length = 0.3 
+    palm_to_wrist_min_length = 0 
+    
+    max_to_wrist_vector_length = 0.3
+    
+    #Iterate over each frame
+    for frame_num in range(len(body_3D_pose[0])):
+        
+        #Iterate over each hand
+        for hand_pose in right_hand_3D_pose, left_hand_3D_pose:
+            
+            #Define which hand we are operating on data points from
+            if hand_pose == right_hand_3D_pose:
+                hand = "RIGHT"
+                wrist_joint = BODY.RIGHT_WRIST
+                
+            if hand_pose ==left_hand_3D_pose:
+                hand = "LEFT"
+                wrist_joint = BODY.LEFT_WRIST
+                
+            #Iterate over each joint in the hand
+            for joint in HAND:
+                
+                #Define distance from the hand point to the wrist, to ensure it is not unrealisticaly far away
+                x1 = body_3D_pose[wrist_joint.value][frame_num][0]
+                x2 = hand_pose[joint.value][frame_num][0]
+                
+                y1 = body_3D_pose[wrist_joint.value][frame_num][1]
+                y2 = hand_pose[joint.value][frame_num][1]
+                
+                z1 = body_3D_pose[wrist_joint.value][frame_num][2]
+                z2 = hand_pose[joint.value][frame_num][2]
+                    
+                to_wrist_vector_length = np.linalg.norm([x1-x2, y1-y2, z1-z2])
+                
+                #If that line has unrealistic proprotions, mark this point as invalid
+                if to_wrist_vector_length > max_to_wrist_vector_length:
+                    
+                    hand_pose[joint.value][frame_num][3] = True
+                
+                #If the palm is to far from the wrist, mark it as invalid
+                if joint == HAND.PALM:
+                    
+                    if to_wrist_vector_length > palm_to_wrist_max_length or to_wrist_vector_length < palm_to_wrist_min_length:
+                        
+                        hand_pose[HAND.PALM.value][frame_num][3] = True
+                
+                #If joint connects to the palm:
+                elif joint.value%4 == 1:
+                    
+                    #Define distance to the joint we draw a line to to make the skeleton (these are the lines from the palms to the knuckles)
+                    x1 = hand_pose[joint.value][frame_num][0]
+                    x2 = hand_pose[HAND.PALM.value][frame_num][0]
+                    
+                    y1 = hand_pose[joint.value][frame_num][1]
+                    y2 = hand_pose[HAND.PALM.value][frame_num][1]
+                    
+                    z1 = hand_pose[joint.value][frame_num][2]
+                    z2 = hand_pose[HAND.PALM.value][frame_num][2]
+                    
+                    vector_length = np.linalg.norm([x1-x2, y1-y2, z1-z2])
+                    
+                    #If the length of the line is unrealistic mark the two points at its ends as invalid
+                    if vector_length > palm_to_knuckles_max_length or vector_length < palm_to_knuckles_min_length:
+                        
+                        hand_pose[joint.value][frame_num][3] = True
+                        hand_pose[HAND.PALM.value][frame_num][3] = True
+                    
+                #For other joints
+                else:
+                    
+                    #Define distance to the joint we draw a line to to make the skeleton (These are the lines in the fingers)
+                    x1 = hand_pose[joint.value][frame_num][0]
+                    x2 = hand_pose[joint.value-1][frame_num][0]
+                    
+                    y1 = hand_pose[joint.value][frame_num][1]
+                    y2 = hand_pose[joint.value-1][frame_num][1]
+                    
+                    z1 = hand_pose[joint.value][frame_num][2]
+                    z2 = hand_pose[joint.value-1][frame_num][2]
+                    
+                    vector_length = np.linalg.norm([x1-x2, y1-y2, z1-z2])
+                    
+                    #If the length of the line is unrealistic mark the two points at its ends as invalid
+                    if vector_length > finger_interjoint_max_length or vector_length < finger_interjoint_min_length:
+
+                        hand_pose[joint.value-1][frame_num][3] = True
+                        hand_pose[joint.value][frame_num][3] = True
+                        
+        #For each joint in the body
+        for joint in BODY:
+            
+            #For joints above the legs, excluding the facial features
+            if joint.value < 9:
+                
+                #For joints that connect to the chest
+                if joint == BODY.HEAD or joint== BODY.LEFT_SHOULDER or joint == BODY.RIGHT_SHOULDER or joint == BODY.PELVIS:
+                    
+                    #Define distance to the joint we draw a line to to make the skeleton  (these are the lines from the torso)
+                    x1 = body_3D_pose[joint.value][frame_num][0]
+                    x2 = body_3D_pose[BODY.CHEST.value][frame_num][0]
+                    
+                    y1 = body_3D_pose[joint.value][frame_num][1]
+                    y2 = body_3D_pose[BODY.CHEST.value][frame_num][1]
+                    
+                    z1 = body_3D_pose[joint.value][frame_num][2]
+                    z2 = body_3D_pose[BODY.CHEST.value][frame_num][2]
+                    
+                    vector_length = np.linalg.norm([x1-x2, y1-y2, z1-z2])
+                    
+                    #If the length of the line is unrealistic mark the two points at its ends as invalid
+                    if joint == BODY.PELVIS:
+                        if vector_length > max_back_length or vector_length < min_back_length:
+                            body_3D_pose[joint.value][frame_num][3] = True
+                    
+                    if joint == BODY.HEAD:
+                        if vector_length > max_neck_length or vector_length < min_neck_length:
+                            body_3D_pose[joint.value][frame_num][3] = True
+                            
+                    if joint == BODY.LEFT_SHOULDER or joint == BODY.RIGHT_SHOULDER:
+                         if vector_length > max_collar_length or vector_length < min_collar_length:
+                             body_3D_pose[joint.value][frame_num][3] = True
+                    
+                #For the arms
+                elif joint == BODY.RIGHT_ELBOW or joint== BODY.LEFT_ELBOW or joint == BODY.RIGHT_WRIST or joint == BODY.LEFT_WRIST:
+                    
+                    #Define distance to the joint we draw a line to to make the skeleton (these are the lines on the arms)
+                    x1 = body_3D_pose[joint.value][frame_num][0]
+                    x2 = body_3D_pose[joint.value -1 ][frame_num][0]
+                    
+                    y1 = body_3D_pose[joint.value][frame_num][1]
+                    y2 = body_3D_pose[joint.value -1 ][frame_num][1]
+                    
+                    z1 = body_3D_pose[joint.value][frame_num][2]
+                    z2 = body_3D_pose[joint.value -1 ][frame_num][2]
+                    
+                    vector_length = np.linalg.norm([x1-x2, y1-y2, z1-z2])
+                    
+                    #If the length of the line is unrealistic mark the two points at its ends as invalid
+                    if vector_length > max_arm_link_length or vector_length < min_arm_link_length:
+                             body_3D_pose[joint.value][frame_num][3] = True
+                             
+            
+            #For the eye 'joints'        
+            elif joint == BODY.LEFT_EYE or joint == BODY.RIGHT_EYE:
+                
+                    #Define distance to the joint we draw a line to to make the skeleton (these are the eye-head lines)
+                    x1 = body_3D_pose[joint.value][frame_num][0]
+                    x2 = body_3D_pose[BODY.HEAD.value][frame_num][0]
+                    
+                    y1 = body_3D_pose[joint.value][frame_num][1]
+                    y2 = body_3D_pose[BODY.HEAD.value][frame_num][1]
+                    
+                    z1 = body_3D_pose[joint.value][frame_num][2]
+                    z2 = body_3D_pose[BODY.HEAD.value][frame_num][2]
+                    
+                    vector_length = np.linalg.norm([x1-x2, y1-y2, z1-z2])
+                    
+                    #If the length of the line is unrealistic mark the two points at its ends as invalid
+                    if vector_length > eye_head_max_length or vector_length < eye_head_min_length:
+                        body_3D_pose[joint.value][frame_num][3] = True
+
+                   
+    return body_3D_pose, left_hand_3D_pose,right_hand_3D_pose
+
+
+def overwrite_bad_values(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose):
+    """Overwrite invalid points in a list with the last valid point seen"""
+    
+    #Define empty list to fill with the last good points seen for each joint
+    last_good_left_list = [ [] for i in HAND]
+    last_good_right_list = [ [] for i in HAND]
+    last_good_body_list = [ [] for i in BODY]
+    
+    #Iterate over each frame
+    for frame_num in range(len(body_3D_pose[0])):
+        
+        #For each joint in the body
+        for joint in BODY:
+            
+            #Define whether point is invalid
+            point_bad = body_3D_pose[joint.value][frame_num][3]
+            
+            #For joints above the legs, excluding the facial features
+            if joint.value < 9:
+                
+                #For joints that connect to the chest, offset position from current chest position
+                if joint == BODY.HEAD or joint== BODY.LEFT_SHOULDER or joint == BODY.RIGHT_SHOULDER or joint == BODY.PELVIS:
+                    
+                    last_good_body_list, body_3D_pose = overwrite_position(joint, point_bad, frame_num, last_good_body_list, body_3D_pose, body_3D_pose, last_good_body_list, offset_joint = BODY.CHEST)
+                       
+                #For the arms, offset position from the current previous joint on the arm
+                elif joint == BODY.RIGHT_ELBOW or joint== BODY.LEFT_ELBOW or joint == BODY.RIGHT_WRIST or joint == BODY.LEFT_WRIST:
+                    
+                    last_good_body_list, body_3D_pose = overwrite_position(joint, point_bad, frame_num, last_good_body_list, body_3D_pose, body_3D_pose, last_good_body_list, offset_joint = BODY(joint.value - 1))
+                   
+            #For the eye 'joints'    , offset position from the head    
+            elif joint == BODY.LEFT_EYE or joint == BODY.RIGHT_EYE:
+                
+                last_good_body_list, body_3D_pose = overwrite_position(joint, point_bad, frame_num, last_good_body_list, body_3D_pose, body_3D_pose, last_good_body_list, offset_joint = BODY.HEAD)
+                
+        #Iterate over each hand
+        for hand_pose in right_hand_3D_pose, left_hand_3D_pose:
+            
+            #Define which hand we are operating on data points from
+            if hand_pose == right_hand_3D_pose:
+                hand = "RIGHT"
+                wrist_joint = BODY.RIGHT_WRIST
+                last_good_hand_list = last_good_right_list
+                
+            if hand_pose ==left_hand_3D_pose:
+                hand = "LEFT"
+                wrist_joint = BODY.LEFT_WRIST
+                last_good_hand_list = last_good_left_list
+              
+                
+            #Iterate over each joint in the hand
+            for joint in HAND:
+                    
+                #Define whether point is invalid
+                point_bad = hand_pose[joint.value][frame_num][3]
+                
+                #For the palm, offset position from the wrist
+                if joint == HAND.PALM:
+                    
+                    last_good_hand_list, hand_pose = overwrite_position(joint, point_bad, frame_num, last_good_hand_list, hand_pose, body_3D_pose, last_good_body_list, offset_joint = wrist_joint)
+                    
+                #If joint connects to the palm, offset position from the wrist
+                elif joint.value%4 == 1:
+                    
+                    last_good_hand_list, hand_pose = overwrite_position(joint, point_bad, frame_num, last_good_hand_list, hand_pose, body_3D_pose, last_good_body_list, offset_joint = wrist_joint)
+
+                #For other joints in the fingers, offset position from the wrist
+                else:
+                    
+                    last_good_hand_list, hand_pose = overwrite_position(joint, point_bad, frame_num, last_good_hand_list, hand_pose, body_3D_pose, last_good_body_list, offset_joint = wrist_joint)
+                   
+    return body_3D_pose, left_hand_3D_pose,right_hand_3D_pose
+
+
+def overwrite_position(joint, point_bad, frame_num, last_good_list, pose, body_3D_pose, last_good_body_list, offset_joint = False):
+    """Function to overwrite a specific invalid point with its last good value, defining the last valid point, and the replacement point, from the corresponding offset joint"""
+    
+    #If the point is not invalid, just update the last good list
+    if point_bad == False:
+        
+        last_good_list[joint.value] = [pose[joint.value][frame_num][0], pose[joint.value][frame_num][1], pose[joint.value][frame_num][2], pose[joint.value][frame_num][3], frame_num]
+    
+    #If the point is invalid and we have a previous valid point 
+    elif point_bad == True and last_good_list[joint.value] != []:
+        
+        #Treat the offsets from the wrists seperately as they are stored on seperate lists to the 'pose' list if we call for them from the left or right hand pose lists
+        if offset_joint == BODY.LEFT_WRIST or offset_joint == BODY.RIGHT_WRIST:
+            
+            #If we have a previous offset valid point
+            if last_good_body_list[offset_joint.value] !=  []:
+                
+                #Define the frame that the previous valid point is from
+                offset_original_frame = last_good_list[joint.value][4]
+                
+                #Find the previous valid offset point location
+                offset_position = body_3D_pose[offset_joint.value][offset_original_frame]
+                
+                #Find said location in relation to the offset joint
+                old_pos_from_offset = np.subtract(last_good_list[joint.value][0:3], offset_position[0:3])  
+                
+                #Use the current position of the offset joint to find the position to overwrite the invalid point with
+                new_pos = np.add(old_pos_from_offset[0:3], last_good_body_list[offset_joint.value][0:3])  
+                
+                #Update the invalid point on the pose list with the valid point
+                pose[joint.value][frame_num] = [new_pos[0], new_pos[1], new_pos[2], True]
+            
+            #If you have no previous valid point, do nothing
+            else:
+                pass
+        
+        #For any other offset joint
+        elif offset_joint != False:
+            if last_good_list[offset_joint.value] !=  []:
+                
+                #Define the frame that the previous valid point is from
+                offset_original_frame = last_good_list[joint.value][4]
+                
+                #Find the previous valid offset point location
+                offset_position = pose[offset_joint.value][offset_original_frame]
+                
+                #Find said location in relation to the offset joint
+                old_pos_from_offset = np.subtract(last_good_list[joint.value][0:3], offset_position[0:3]) 
+                
+                #Use the current position of the offset joint to find the position to overwrite the invalid point with
+                new_pos = np.add(old_pos_from_offset[0:3], last_good_list[offset_joint.value][0:3])  
+                
+                #Update the invalid point on the pose list with the valid point
+                pose[joint.value][frame_num] = [new_pos[0], new_pos[1], new_pos[2], True]
+                
+            #If we do not have a previous valid point    
+            else:
+                
+                pass
+                
+        #If we call this without an offset joint, just use the last good value
+        elif offset_joint == False:
+            pose[joint.value][frame_num] = last_good_list[joint.value]
+
+    #If we do not have a previous valid point
+    else:
+        
+        pass
+    
+    return last_good_list, pose
+
 def get_plot_list(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose):
     """Turn tracked points into a series of lines to animate"""
     
-    print("filter started")
-    
-
-    
-    
-    
-    print("filter finished")
-    
     #Define empty list to fill with lines to animate
     results_list = [ [] for i in range(len(body_3D_pose[0]))]
-    
+
     #Iterate over each frame
     for frame_num in range(len(body_3D_pose[0])):
         
@@ -318,43 +562,43 @@ def get_plot_list(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose):
                 elif joint.value%4 == 1:
                     
                     #Define a line from the joint to the palm
-                    x1 = hand_pose[joint.value][frame_num][0] + wrist_offset[0]
-                    x2 = hand_pose[HAND.PALM.value][frame_num][0] + wrist_offset[0]
+                    x1 = hand_pose[joint.value][frame_num][0]
+                    x2 = hand_pose[HAND.PALM.value][frame_num][0] 
                     
-                    y1 = hand_pose[joint.value][frame_num][1] + wrist_offset[1]
-                    y2 = hand_pose[HAND.PALM.value][frame_num][1] + wrist_offset[1]
+                    y1 = hand_pose[joint.value][frame_num][1] 
+                    y2 = hand_pose[HAND.PALM.value][frame_num][1] 
                     
-                    z1 = hand_pose[joint.value][frame_num][2] + wrist_offset[2]
-                    z2 = hand_pose[HAND.PALM.value][frame_num][2]+wrist_offset[2]
-                    
+                    z1 = hand_pose[joint.value][frame_num][2] 
+                    z2 = hand_pose[HAND.PALM.value][frame_num][2]        
+
                     #Define whether the line is valid, using whether both ends of the line, and the wrist, are valid
-                    if hand_pose[joint.value][frame_num][3] == True or hand_pose[HAND.PALM.value][frame_num][3] == True or wrist_offset[3] ==True:
+                    if hand_pose[joint.value][frame_num][3] == True or hand_pose[HAND.PALM.value][frame_num][3] == True:
                         
                         lost_track = True
                     
-                    #Append line to the results list
+                    #Append line to list of lines to draw
                     results_list[frame_num].append([[x1,x2], [y1,y2], [z1,z2], lost_track])
-                
+                    
                 #For other joints
                 else:
                     
-                    #Draw a line from the joint to the previous joint
-                    x1 = hand_pose[joint.value][frame_num][0]+wrist_offset[0]
-                    x2 = hand_pose[joint.value-1][frame_num][0]+wrist_offset[0]
+                    #Define a line from the joint to the previous joint
+                    x1 = hand_pose[joint.value][frame_num][0]
+                    x2 = hand_pose[joint.value-1][frame_num][0]
                     
-                    y1 = hand_pose[joint.value][frame_num][1]+wrist_offset[1]
-                    y2 = hand_pose[joint.value-1][frame_num][1]+wrist_offset[1]
+                    y1 = hand_pose[joint.value][frame_num][1]
+                    y2 = hand_pose[joint.value-1][frame_num][1]
                     
-                    z1 = hand_pose[joint.value][frame_num][2]+wrist_offset[2]
-                    z2 = hand_pose[joint.value-1][frame_num][2]+wrist_offset[2]
+                    z1 = hand_pose[joint.value][frame_num][2]
+                    z2 = hand_pose[joint.value-1][frame_num][2]
                     
                     #Define whether the line is valid, using whether both ends of the line, and the wrist, are valid
                     if hand_pose[joint.value][frame_num][3] == True or hand_pose[joint.value-1][frame_num][3] == True or wrist_offset[3] == True:
                         lost_track = True
                     
-                    #Append line to the results list
+                    #Append line to list of lines to draw
                     results_list[frame_num].append([[x1,x2], [y1,y2], [z1,z2], lost_track])
-        
+                    
         #For each joint in the body
         for joint in BODY:
             
@@ -381,9 +625,9 @@ def get_plot_list(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose):
                     if body_3D_pose[joint.value][frame_num][3] == True or body_3D_pose[BODY.CHEST.value][frame_num][3] == True:
                         lost_track = True
                     
-                    #Append line to the results list to be animated
+                    #Append line to list of lines to draw
                     results_list[frame_num].append([[x1,x2], [y1,y2], [z1,z2], lost_track])
-
+                    
                 #For the arms
                 else:
                     
@@ -402,9 +646,9 @@ def get_plot_list(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose):
 
                         lost_track = True
                     
-                    #Append line to the results list
+                    #Append line to list of lines to draw
                     results_list[frame_num].append([[x1,x2], [y1,y2], [z1,z2], lost_track])
-
+                    
             #For the eye 'joints'        
             elif joint == BODY.LEFT_EYE or joint == BODY.RIGHT_EYE:
                 
@@ -417,30 +661,32 @@ def get_plot_list(body_3D_pose, left_hand_3D_pose,right_hand_3D_pose):
                     
                     z1 = body_3D_pose[joint.value][frame_num][2]
                     z2 = body_3D_pose[BODY.HEAD.value][frame_num][2]
-                    
+                        
                     #If either joints have invalid position
                     if body_3D_pose[joint.value][frame_num][3] == True or body_3D_pose[BODY.HEAD.value][frame_num][3] == True:
                         
-                        #Update results list with the line, mark it as invalid
-                        results_list[frame_num].append([[x1,x2], [y1,y2], [z1,z2], True])
-                    
-                    #If points are good
+                         lost_track = True
+                         
+                         #Append line to list of lines to draw
+                         results_list[frame_num].append([[x1,x2], [y1,y2], [z1,z2], lost_track])
+
+                    #If both points are good
                     else:
-                        
-                        #Update results list with the line, mark it as valid
-                        results_list[frame_num].append([[x1,x2], [y1,y2], [z1,z2], False])
-
+                         
+                         #Append line to list of lines to draw
+                         results_list[frame_num].append([[x1,x2], [y1,y2], [z1,z2], lost_track])
+                                 
     return results_list
+    
 
-
-def crop(listtocrop, length):
+def crop(listtocrop, length, start = 0):
     """Function to crop a pose list to a certain length""" 
+    croppedlist = []
+    for row in listtocrop:
+        croppedlist.append(row[start:length+start])
+        
     
-    array = np.array(listtocrop)
-    array = array[:,0:length]
-    output = array.tolist()
-    
-    return output
+    return croppedlist
 
 if __name__ == '__main__': 
     
@@ -454,15 +700,17 @@ if __name__ == '__main__':
     
     #file_name = 'stationaytrial5.17.3.9.44'
     #file_name = 'trial6dylan.16.3.9.50'
-    #file_name = 'trial7thomas.16.3.10.24'
-    file_name = 'test9keiran.17.3.11.40'
-    
+    file_name = 'trial7thomas.16.3.10.24'
+    #file_name = 'test9keiran.17.3.11.40'
+    #file_name = 'trial7josie.17.3.10.31'
+
     #Find if file has already been processed to extract the pose lists
     try:
         readfile = open("bin/points_data/" + file_name + ".pickle", "rb")
         BODY3DPOSE = pickle.load(readfile)
         LEFTHAND3DPOSE = pickle.load(readfile)
         RIGHTHAND3DPOSE = pickle.load(readfile)
+        readfile.close()
     
     #If not, process the file to extract the pose lists
     except FileNotFoundError:
@@ -473,38 +721,51 @@ if __name__ == '__main__':
         pickle.dump(BODY3DPOSE, pointsfile)
         pickle.dump(LEFTHAND3DPOSE, pointsfile)    
         pickle.dump(RIGHTHAND3DPOSE, pointsfile)
+        pointsfile.close()
     
         #Then extract the poselists from the saved file for consistency with the prior method
         readfile = open("bin/points_data/" + file_name + ".pickle", "rb")
-        BODY3DPOSE = pickle.load(readfile)
-        LEFTHAND3DPOSE = pickle.load(readfile)
-        RIGHTHAND3DPOSE = pickle.load(readfile)
+        readbody3dpose = pickle.load(readfile)
+        readlefthand3dpose = pickle.load(readfile)
+        readrighthand3dpose = pickle.load(readfile)
+        readfile.close()
     
     #Define the length that we want to crop the recording to
-    croplength = 2700
+    croplength = 2735
+    cropstart = 0
     
     #Define an additional string to give this filtered cropped recording a unique file name
-    extrastring = '10'
+    extrastring = 'Full'
     
     #Crop the pose lists    
-    body_3D_pose_cropped = crop(BODY3DPOSE, croplength)
-    left_hand_3D_pose_cropped = crop(LEFTHAND3DPOSE, croplength)
-    right_hand_3D_pose_cropped = crop(RIGHTHAND3DPOSE, croplength)    
+    body_3D_pose_cropped = crop(readbody3dpose, croplength, start = cropstart)
+    left_hand_3D_pose_cropped = crop(readlefthand3dpose, croplength, start = cropstart)
+    right_hand_3D_pose_cropped = crop(readrighthand3dpose, croplength, start = cropstart)    
     
     #Filter out jumps in the recorded trajectory
-    body_3D_pose_filtered, left_hand_3D_pos_filtered,right_hand_3D_pose_filtered = filter_out_jumps(body_3D_pose_cropped, left_hand_3D_pose_cropped,right_hand_3D_pose_cropped)
+    body_3D_pose_filtered, left_hand_3D_pose_filtered,right_hand_3D_pose_filtered = filter_out_jumps(body_3D_pose_cropped, left_hand_3D_pose_cropped,right_hand_3D_pose_cropped)
+    
+    #FIlter out limbs that are too long:
+    body_3D_pose_lenthchecked, left_hand_3D_pose_lenthchecked,right_hand_3D_pose_lenthchecked = check_length_constraints(body_3D_pose_filtered, left_hand_3D_pose_filtered,right_hand_3D_pose_filtered)
+    
+    #Overwirte invalid points in the recording
+    body_3D_pose_updated, left_hand_3D_pose_updated,right_hand_3D_pose_updated = overwrite_bad_values(body_3D_pose_lenthchecked, left_hand_3D_pose_lenthchecked,right_hand_3D_pose_lenthchecked )
+    
+    #Smooth the joint trajectories with a savgol filter
+    body_3D_pose_smoothed, left_hand_3D_pose_smoothed,right_hand_3D_pose_smoothed = savgol_filter(body_3D_pose_updated, left_hand_3D_pose_updated,right_hand_3D_pose_updated)
+    
     
     #Convert the pose trajectory into a set of lines to animate
-    results_list = get_plot_list(body_3D_pose_filtered, left_hand_3D_pos_filtered,right_hand_3D_pose_filtered)
+    results_list = get_plot_list(body_3D_pose_smoothed, left_hand_3D_pose_smoothed,right_hand_3D_pose_smoothed)
     
     #Save the set of lines to animate
-    datafile = open("bin/filtered_data/FULL" + file_name + extrastring + ".pickle", "wb")
+    datafile = open("bin/filtered_data/" + file_name + extrastring + ".pickle", "wb")
     pickle.dump(results_list, datafile)
     
     #Print the time required to carry out the above
     print("Time taken is", time.time()-old_time)
     
     #Display an animation of the processed joint trajectories
-    animate(file_name)
-    
+    animate(file_name + extrastring, True)
+
     

@@ -9,11 +9,8 @@ import mpl_toolkits.mplot3d as plt3d
 import matplotlib.animation as animation
 
 
-def update_lines(frame_num, RESULTS_LIST, lines, time_text):
+def update_lines(frame_num, RESULTS_LIST, lines, time_text, showfalse):
     """Function to update the drawn lines in the animation"""
-    
-    #Flag to state whether you should display data points flagged as false
-    showfalse = True
     
     #create counter for the line we are currently referring to
     i = 0
@@ -62,7 +59,7 @@ def update_lines(frame_num, RESULTS_LIST, lines, time_text):
     return lines
      
         
-def animate(file_name):
+def animate(file_name, showfalse = True):
     """Function to display animation of recorded skeleton"""
     
     #Load file with saved lines
@@ -99,16 +96,19 @@ def animate(file_name):
     time_text = ax.text(0,0.5,0,s= 'Frame = ',horizontalalignment='left',verticalalignment='top', transform=ax.transAxes)
     
     #Creating the Animation object
-    ani = animation.FuncAnimation(fig, update_lines, len(loaded_results), fargs = [loaded_results, lines, time_text],
+    ani = animation.FuncAnimation(fig, update_lines, len(loaded_results), fargs = [loaded_results, lines, time_text, showfalse],
                                        interval=100, blit=False, repeat = True)
     
+    #Display the animation
+    plt.show()
+    
+
     #Save the animation we create
     Writer = animation.writers['ffmpeg']
     writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
     ani.save(file_name +'.mp4', writer=writer)
-    
-    #Display the animation
-    plt.show()
+
+
 
 if __name__ == '__main__': 
     

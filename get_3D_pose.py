@@ -378,11 +378,32 @@ def get_arm_3D_coordinates(filename, confidence_threshold = 0, show_each_frame =
 if __name__ == '__main__': 
 
     #Load an example file
-    body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('trial1dylan.12.3.16.31', show_each_frame =  False)
-
+    file_name = 'test9keiran.17.3.11.40'
+    #body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates('trial1dylan.12.3.16.31', show_each_frame =  False)
+    body_3D_pose, left_hand_3D_pose, right_hand_3D_pose = get_arm_3D_coordinates(file_name, show_each_frame =  False) 
     #Print some values from it
     print(body_3D_pose[BODY.RIGHT_ELBOW.value])
     
+    #Save the extracted poselists
+    pointsfile = open("bin/points_data/" + file_name + ".pickle", "wb")
+    pickle.dump(body_3D_pose, pointsfile)
+    pickle.dump(left_hand_3D_pose, pointsfile)    
+    pickle.dump(right_hand_3D_pose, pointsfile)
+    pointsfile.close()
+
+    #Then extract the poselists from the saved file for consistency with the prior method
+    readfile = open("bin/points_data/" + file_name + ".pickle", "rb")
+    BODY3DPOSE = pickle.load(readfile)
+    LEFTHAND3DPOSE = pickle.load(readfile)
+    RIGHTHAND3DPOSE = pickle.load(readfile)
+    readfile.close()
+
+    a= BODY3DPOSE
+    b= LEFTHAND3DPOSE
+    c = RIGHTHAND3DPOSE
+
+    
+    """
     #Convert the right palms trajectory into a form for 3D plotting
     x_sec= []
     y_sec= []
@@ -400,5 +421,5 @@ if __name__ == '__main__':
     ax = Axes3D(fig)
     ax.scatter(x_sec, y_sec, z_sec)
     plt.show()
-
+    """
 
