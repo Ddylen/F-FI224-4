@@ -62,6 +62,10 @@ Render a 3D wireframe skeleton to show the tracked pose (legs deliberately not r
 Code to get the standard deviation of the wrist position (useful for determining tracking accuracy from videos where the wrist is held stationary)
 
 #### Example Files
+
+###### UR5Cookingprogram
+Code to get a UR5 to cook pancakes according to input timings
+
 ###### follow_me_updated_openpose
 Code to command the UR5 to move its end effector along the trajectory of the wrist from a recording. 
 
