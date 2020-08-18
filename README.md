@@ -6,7 +6,12 @@ This GitHub repository contains all the code used during the F-FI224-4 masters p
 
 ## Prerequisites
 
-See [prerequisites](docs/prerequistes.md)
+See [prerequisites](docs/prerequisites.md)
+
+
+## Replicating my Work
+ 
+See [instructions](docs/instructions.md)
 
 
 ## Description of Repository Structure
@@ -89,6 +94,3 @@ Contains the gifs/images used in this markdown file
 
 Empty folder that depthviewer.py can save images from the recorded Kinect depth video to
 
-## Replicating my Work
- 
-See [instructions](docs/instructions.md)
