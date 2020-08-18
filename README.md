@@ -74,7 +74,7 @@ Various JSON files that contain the kinaesthetically taught trajectories that th
 
 ### Folders
 
-#### JSONTrajectories
+#### trajectory
 
 Contains kinaesthetically taught UR5 trajectories that were not used in the final cooking demonstrations
 
@@ -86,13 +86,9 @@ Contains the watch.py file which called OpenPose from python. This is in the bin
 
 Contains all of this project's MATLAB code. This contains the code for defining bounding boxes around the kitchen tools, extracting time from the detected pose trajectory, carrying out distance correlation and plotting many of the graphs used in my masters report. This code reads CSV pose trajectory files produced by the python code
 
-#### old_python_code
+#### docs
 
-Contains less important/ malfunctioning variants of the code included in the main folder, as well as test code. Could be worth searching through if you want to extend on this project and you find yourself wanting to carry out some process that I also tried and failed to do very well. 
-
-#### githubgraphics
-
-Contains the gifs/images used in this markdown file
+Includes additional markdown documentation and gifs/images used in it
 
 #### depthimages
 
