@@ -4,9 +4,9 @@ This project has relied heavy on to OpenPose pretrained neural network to locali
 
 #### OpenPose Windows Portable Demo Installation Instructions
 
-1) Download latest version of the demo from [this link](https://github.com/CMU-Perceptual-Computing-Lab/openpose/releases). Each version has multiple files attached to it, I’m unsure as to the exact difference between these. This project has been using 'openpose-1.5.1-binaries-win64-gpu-python-flir-3d_recommended', but a more recent version has been released since then. To reiterate, you only need ONE of the cluster of files listed in the most recent version
+1) Download latest version of the demo from [this link](https://github.com/CMU-Perceptual-Computing-Lab/openpose/releases). Each version has multiple files attached to it, I’m unsure as to the exact difference between these. This project has been using 'openpose-1.5.1-binaries-win64-gpu-python-flir-3d_recommended', but a more recent version has been released since then. To reiterate, you only need ONE of the cluster of files listed in the most recent release
 
-2) Extract downloaded zip file
+2) Extract the downloaded zip file
 
 3) Follow the instructions in the file 'Instructions.txt'. For clarity, these are
 
@@ -18,13 +18,13 @@ This project has relied heavy on to OpenPose pretrained neural network to locali
 
 With the above completed, the demo can be run by executing the file 'bin/OpenPoseDemo', either by double clicking it or through the command line.
 
-Using the command line allows a number of additional parameters to be specified, like which camera to use (if there are multiple), the maximum number of people to track in an image, whether to save the resulting joint positions and in what format they would be saved, and whether to save the video of the human skeletons superimposed on the input video, etc. 
+Using the command line allows a number of additional parameters to be specified, like which camera to use (if there are multiple), the maximum number of people to track in an image, whether to save the resulting joint positions and in what format they should be saved, and whether to save the video of the human skeletons superimposed on the input video, etc. 
 
-The way the output of the demo is/can be structures is [described here](https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md)
+The way the output of the demo is/can be structured is [described here](https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md)
 
 #### Issues with the OpenPose Windows Portable Demo
 
-At least twice during this project windows defender on the labs Windows 10 dell PC has (apparently spontaneously) started declaring an error message that 'this file cannot be run on this pc' when attempting to run the demo. Uninstalling (i.e. deleting the OpenPose folder) and reinstalling OpenPose a described above fixes this issue when it comes up
+At least twice during this project windows defender on the labs Windows 10 dell PC has (apparently spontaneously) started raising an error message that 'this file cannot be run on this pc' when attempting to run the demo. Uninstalling (i.e. deleting the OpenPose folder) and reinstalling OpenPose as described above fixes this issue when it comes up
 
 ### PyKinect2
 
@@ -50,7 +50,7 @@ To command the UR5, this project used the [generic UR5 controller](https://githu
 
 Setting up the UR5 to accept commands via this library requires changing some settings on the UR5 itself, via its touch screen interface. A guide to how to do this is laid out below
 
-1)	Connect your computer to the UR5 (this requires an ethernet cable, if your computer lacks such a port use a USB to ethernet converter). The robots ethernet port is (I believe) on its black control box
+1)	Connect your computer to the UR5 (this requires an ethernet cable, if your computer lacks such a port use a USB to ethernet converter). The robot's ethernet port is (I believe) on its black control box
 
 2) Ensure that the robot is on
 
@@ -60,7 +60,7 @@ Setting up the UR5 to accept commands via this library requires changing some se
 
 5) Update self.host (line 27 in the version I am using) with the ethernet IP you recorded in step 3
 
-6) Go to the file Generic_ur5_controller.py (or whichever file you intend to use to command the robot from python). You will see a line along the lines of ````burt = kgr.kg_robot(port=30010,db_host="192.168.1.10")````, which initiates communication between your computer and the robot. Change the ````db_host```` variable to an IP address similar to your ethernet IP from step 3, but with the last number changes. You will need to use an address like your IP but with the last number changed in ANY file from which you want to command the robot
+6) Go to the file Generic_ur5_controller.py (or whichever file you intend to use to command the robot from python). You will see a line along the lines of ````burt = kgr.kg_robot(port=30010,db_host="192.168.1.10")````, which initiates communication between your computer and the robot. Change the ````db_host```` variable to an IP address similar to your ethernet IP from step 3, but with the last number changed. You will need to use an address like your IP but with the last number changed in ANY file from which you want to command the robot
 
 7) Swap to the UR5 touch screen
 
@@ -77,7 +77,7 @@ Setting up the UR5 to accept commands via this library requires changing some se
 13) Press apply
 
 ### Kinect Studio
-This software allows you toe record and replay colour and depth video from the Kinect. Some parts of my code require the computer to be connect to a Kinect, said programs also work if the computer as Kinect Studio open and playing a recorded video (note that such videos can be played on loop so a long recording isn’t necessary, which is beneficial as Kinect studio recordings take up a lot of memory)
+This software allows you to record and replay colour and depth video from the Kinect. Some parts of my code require the computer to be connect to a Kinect, said programs also work if the computer has Kinect Studio open and playing a recorded video (note that such videos can be played on loop so a long recording isn’t necessary, which is beneficial as Kinect studio recordings take up a lot of memory)
 
 Kinect studio can be downloaded from [here](https://www.microsoft.com/en-us/download/details.aspx?id=44561)
 
